@@ -6,88 +6,66 @@
 //*******************************************************
 // CLI Interface Header
 //********************************************************
-#ifndef TX_CLI_H
-#define TX_CLI_H
-#pragma once
-
-
-#include <stdlib.h>
-#include <ctype.h>
-#include "setup_tx.h"
-
+#include "cli.h"
 
 extern volatile uint32_t millis32(void);
 extern tTxStats txstats;
 extern tConfigId config_id;
 
-
 //-------------------------------------------------------
 // param helper routines
 //-------------------------------------------------------
-
-typedef enum {
-    PARAM_FORMAT_DEFAULT = 0,
-    PARAM_FORMAT_CLI,
-    PARAM_FORMAT_DISPLAY,
-} PARAM_FORMAT_ENUM;
-
-//public:
-void tTxCli_Init(tSerialBase* _comport);
-void tTxCli_Set(uint8_t new_line_end);
-void tTxCli_Do(void);
-uint8_t tTxCli_Task(void);
-int32_t tTxCli_GetTaskValue(void);
-
 
 // helper, extracts value as string from optstr for parameters of type LIST
 // "50 Hz,31 Hz,19 Hz" etc
 bool _param_get_listval_fromoptstr(char* s, uint8_t param_idx, uint8_t value, uint8_t format)
 {
-int8_t seps[24];
-uint8_t nr, n;
-
+	int8_t seps[24];
+	uint8_t nr, n;
     const char* optstr = SetupParameter[param_idx].optstr;
 
-    if (format == PARAM_FORMAT_CLI) {
-         if (param_idx == PARAM_INDEX_RF_BAND) { // RF Band
-             optstr = SETUP_OPT_RF_BAND_LONGSTR;
-         }
-         if ((SetupParameter[param_idx].ptr == &Setup.Tx[0].Diversity) ||
-             (SetupParameter[param_idx].ptr == &Setup.Rx.Diversity)) {
+    if (format == PARAM_FORMAT_CLI) 
+	{
+         if (param_idx == PARAM_INDEX_RF_BAND) optstr = SETUP_OPT_RF_BAND_LONGSTR; // RF Band
+         if ((SetupParameter[param_idx].ptr == &Setup.Tx[0].Diversity) || (SetupParameter[param_idx].ptr == &Setup.Rx.Diversity)) 
+		 {
              optstr = SETUP_OPT_DIVERSITY_LONGSTR;
          }
-    } else
-    if (format == PARAM_FORMAT_DISPLAY) {
-        if (param_idx == PARAM_INDEX_RF_BAND) { // RF Band
-            optstr = SETUP_OPT_RF_BAND_DISPSTR;
-        }
-        if ((SetupParameter[param_idx].ptr == &Setup.Tx[0].Diversity) ||
-            (SetupParameter[param_idx].ptr == &Setup.Rx.Diversity)) {
+    } 
+	else if (format == PARAM_FORMAT_DISPLAY) 
+	{
+        if (param_idx == PARAM_INDEX_RF_BAND) optstr = SETUP_OPT_RF_BAND_DISPSTR; // RF Band
+        if ((SetupParameter[param_idx].ptr == &Setup.Tx[0].Diversity) || (SetupParameter[param_idx].ptr == &Setup.Rx.Diversity)) 
+		{
             optstr = SETUP_OPT_DIVERSITY_DISPSTR;
         }
-        if (SetupParameter[param_idx].ptr == &Setup.Rx.SerialLinkMode) {
+        if (SetupParameter[param_idx].ptr == &Setup.Rx.SerialLinkMode) 
+		{
             optstr = SETUP_OPT_SERIAL_LINK_MODE_DISPLAYSTR;
         }
     }
-
     seps[0] = -1;
     nr = 1;
-    for (n = 0; n < strlen(optstr); n++) {
-        if (optstr[n] == ',') { seps[nr] = n; nr++; }
+    for (n = 0; n < strlen(optstr); n++) 
+	{
+        if (optstr[n] == ',') 
+		{ 
+			seps[nr] = n; 
+			nr++; 
+		}
     }
     seps[nr] = n;
-
     // we have now: -1, 5, 11, 17, and nr = 3
-
-    if (value >= nr) { s[0] = '\0'; return false; }
-
+    if (value >= nr) 
+	{ 
+		s[0] = '\0'; 
+		return false; 
+	}
     n = 0;
     for (uint8_t i = seps[value] + 1; i < seps[value + 1]; i++) s[n++] = optstr[i];
     s[n] = '\0';
-
     return true;
 }
-
 
 // helper, returns allowed mask for LIST
 uint16_t param_get_allowed_mask(uint8_t param_idx)
@@ -95,19 +73,18 @@ uint16_t param_get_allowed_mask(uint8_t param_idx)
     return (SetupParameter[param_idx].allowed_mask_ptr) ? *(SetupParameter[param_idx].allowed_mask_ptr) : UINT16_MAX;
 }
 
-
 // helper, determines number of options in optstr (= maximal number of options)
 uint8_t param_get_opt_num(uint8_t param_idx)
 {
     const char* optstr = SetupParameter[param_idx].optstr;
-
     uint8_t num = 0;
-    for (uint8_t n = 0; n < strlen(optstr); n++) {
+	
+    for (uint8_t n = 0; n < strlen(optstr); n++) 
+	{
         if (optstr[n] == ',') num++;
     }
     return num + 1;
 }
-
 
 // helper, determines number of allowed options in optstr
 uint8_t param_get_allowed_opt_num(uint8_t param_idx)
@@ -115,32 +92,36 @@ uint8_t param_get_allowed_opt_num(uint8_t param_idx)
     if (SetupParameter[param_idx].type != SETUP_PARAM_TYPE_LIST) return UINT8_MAX;
 
     uint16_t allowed_mask = param_get_allowed_mask(param_idx);
-
     uint8_t num = 0;
-    for (uint8_t i = 0; i < param_get_opt_num(param_idx); i++) {
+	
+    for (uint8_t i = 0; i < param_get_opt_num(param_idx); i++) 
+	{
         if (allowed_mask & (1 << i)) num++;
     }
     return num;
 }
-
 
 // helper, finds index from name
 bool param_get_idx(uint8_t* param_idx, char* name)
 {
 char s[64];
 
-    for (uint8_t idx = 0; idx < SETUP_PARAMETER_NUM; idx++) {
+    for (uint8_t idx = 0; idx < SETUP_PARAMETER_NUM; idx++) 
+	{
         uint8_t n = 0;
-        for (uint8_t i = 0; i < strlen(SetupParameter[idx].name); i++) {
+        for (uint8_t i = 0; i < strlen(SetupParameter[idx].name); i++) 
+		{
             s[n] = toupper(SetupParameter[idx].name[i]);
             if (s[n] == ' ') s[n] = '_';
             n++;
         }
         s[n] = '\0';
-
-        if (strcmp(s, name) == 0) { *param_idx = idx; return true; }
+        if (strcmp(s, name) == 0) 
+		{ 
+			*param_idx = idx; 
+			return true; 
+		}
     }
-
     *param_idx = 0;
     return false;
 }
@@ -149,27 +130,38 @@ char s[64];
 // helper, gets parameter value as formatted string, different formats can be specified
 bool param_get_val_formattedstr(char* s, uint8_t param_idx, uint8_t format = PARAM_FORMAT_DEFAULT)
 {
-    switch (SetupParameter[param_idx].type) {
-    case SETUP_PARAM_TYPE_UINT8:
+    switch (SetupParameter[param_idx].type) 
+	{
+		case SETUP_PARAM_TYPE_UINT8:
         break;
-    case SETUP_PARAM_TYPE_INT8:{
-        int8_t i8 = *(int8_t*)(SetupParameterPtr(param_idx));
-        stoBCDstr(i8, s);
-        if (SetupParameter[param_idx].unit[0] != '\0') {
-            strcat(s, " ");
-            strcat(s, SetupParameter[param_idx].unit);
+		
+		case SETUP_PARAM_TYPE_INT8:
+		{
+			int8_t i8 = *(int8_t*)(SetupParameterPtr(param_idx));
+			stoBCDstr(i8, s);
+			if (SetupParameter[param_idx].unit[0] != '\0') 
+			{
+				strcat(s, " ");
+				strcat(s, SetupParameter[param_idx].unit);
+			}
+			return true;
+		}
+		break;
+	
+		case SETUP_PARAM_TYPE_UINT16:
+        break;
+		
+		case SETUP_PARAM_TYPE_INT16:
+        break;
+		
+		case SETUP_PARAM_TYPE_LIST:
+		{
+			uint8_t u8 = *(uint8_t*)(SetupParameterPtr(param_idx));
+			return _param_get_listval_fromoptstr(s, param_idx, u8, format);
         }
-        return true;
-        }break;
-    case SETUP_PARAM_TYPE_UINT16:
-        break;
-    case SETUP_PARAM_TYPE_INT16:
-        break;
-    case SETUP_PARAM_TYPE_LIST:{
-        uint8_t u8 = *(uint8_t*)(SetupParameterPtr(param_idx));
-        return _param_get_listval_fromoptstr(s, param_idx, u8, format);
-        }break;
-    case SETUP_PARAM_TYPE_STR6:
+		break;
+		
+		case SETUP_PARAM_TYPE_STR6:
         strstrbufcpy(s, (char*)SetupParameterPtr(param_idx), 6);
         return true;
     }
@@ -182,63 +174,73 @@ bool param_get_val_formattedstr(char* s, uint8_t param_idx, uint8_t format = PAR
 bool param_set_val_fromint(bool* rx_param_changed, int32_t value, uint8_t param_idx)
 {
     *rx_param_changed = false;
-
-    switch (SetupParameter[param_idx].type) {
-    case SETUP_PARAM_TYPE_UINT8:
+    switch (SetupParameter[param_idx].type) 
+	{
+		case SETUP_PARAM_TYPE_UINT8:
         break;
-    case SETUP_PARAM_TYPE_INT8:{
-        // check
-        int32_t i8 = SetupParameter[param_idx].min.INT8_value;
-        if (value < i8) return false;
-        i8 = SetupParameter[param_idx].max.INT8_value;
-        if (value > i8) return false;
-        // set
-        tParamValue vv;
-        vv.i8 = value;
-        *rx_param_changed = setup_set_param(param_idx, vv);
-        return true;
-        }break;
-    case SETUP_PARAM_TYPE_UINT16:
+		
+		case SETUP_PARAM_TYPE_INT8:
+		{
+			// check
+			int32_t i8 = SetupParameter[param_idx].min.INT8_value;
+			if (value < i8) return false;
+			i8 = SetupParameter[param_idx].max.INT8_value;
+			if (value > i8) return false;
+			// set
+			tParamValue vv;
+			vv.i8 = value;
+			*rx_param_changed = setup_set_param(param_idx, vv);
+			return true;
+        }
+		break;
+		
+		case SETUP_PARAM_TYPE_UINT16:
         break;
-    case SETUP_PARAM_TYPE_INT16:
+		
+		case SETUP_PARAM_TYPE_INT16:
         break;
-    case SETUP_PARAM_TYPE_LIST:{
-        // check
-        if (value < 0) return false;
-        if (value >= param_get_opt_num(param_idx)) return false;
-        if ((param_get_allowed_mask(param_idx) & (1 << value)) == 0) return false;
-        // set
-        tParamValue vv;
-        vv.u8 = value;
-        *rx_param_changed = setup_set_param(param_idx, vv);
-        return true;
-        }break;
-    case SETUP_PARAM_TYPE_STR6:
+		
+		case SETUP_PARAM_TYPE_LIST:
+		{
+			// check
+			if (value < 0) return false;
+			if (value >= param_get_opt_num(param_idx)) return false;
+			if ((param_get_allowed_mask(param_idx) & (1 << value)) == 0) return false;
+			// set
+			tParamValue vv;
+			vv.u8 = value;
+			*rx_param_changed = setup_set_param(param_idx, vv);
+			return true;
+        }
+		break;
+		
+		case SETUP_PARAM_TYPE_STR6:
         // not an integer-valued parameter, so return false
         break;
     }
-
     return false;
 }
-
 
 // helper, sets parameter value from an input string
 bool param_set_str6val(bool* rx_param_changed, char* svalue, uint8_t param_idx)
 {
     *rx_param_changed = false;
 
-    switch (SetupParameter[param_idx].type) {
-    case SETUP_PARAM_TYPE_UINT8:
-    case SETUP_PARAM_TYPE_INT8:
-    case SETUP_PARAM_TYPE_UINT16:
-    case SETUP_PARAM_TYPE_INT16:
-    case SETUP_PARAM_TYPE_LIST:
+    switch (SetupParameter[param_idx].type) 
+	{
+		case SETUP_PARAM_TYPE_UINT8:
+		case SETUP_PARAM_TYPE_INT8:
+		case SETUP_PARAM_TYPE_UINT16:
+		case SETUP_PARAM_TYPE_INT16:
+		case SETUP_PARAM_TYPE_LIST:
         // not a str6-valued parameter, so return false
         break;
-    case SETUP_PARAM_TYPE_STR6:
+		
+		case SETUP_PARAM_TYPE_STR6:
         // check
         if (strlen(svalue) != 6) return false;
-        for (uint8_t i = 0; i < 6; i++) {
+        for (uint8_t i = 0; i < 6; i++) 
+		{
             if (!is_valid_bindphrase_char(svalue[i])) return false;
         }
         // set
@@ -246,103 +248,70 @@ bool param_set_str6val(bool* rx_param_changed, char* svalue, uint8_t param_idx)
         return true;
         break;
     }
-
     return false;
 }
-
 
 // helper, sets parameter value from an input string
 bool param_set_val_fromstr(bool* rx_param_changed, char* svalue, uint8_t param_idx)
 {
     *rx_param_changed = false;
-
-    switch (SetupParameter[param_idx].type) {
-    case SETUP_PARAM_TYPE_UINT8:
-    case SETUP_PARAM_TYPE_INT8:
-    case SETUP_PARAM_TYPE_UINT16:
-    case SETUP_PARAM_TYPE_INT16:
-    case SETUP_PARAM_TYPE_LIST:{
-        int32_t value = atoi(svalue);
-        return param_set_val_fromint(rx_param_changed, value, param_idx);
-        }break;
-    case SETUP_PARAM_TYPE_STR6:
+    switch (SetupParameter[param_idx].type) 
+	{
+		case SETUP_PARAM_TYPE_UINT8:
+		case SETUP_PARAM_TYPE_INT8:
+		case SETUP_PARAM_TYPE_UINT16:
+		case SETUP_PARAM_TYPE_INT16:
+		case SETUP_PARAM_TYPE_LIST:
+		{
+			int32_t value = atoi(svalue);
+			return param_set_val_fromint(rx_param_changed, value, param_idx);
+        }
+		break;
+		
+		case SETUP_PARAM_TYPE_STR6:
         return param_set_str6val(rx_param_changed, svalue, param_idx);
     }
-
     return false;
 }
 
-
-//-------------------------------------------------------
-// CLI class
-//-------------------------------------------------------
-
-typedef enum {
-    CLI_TASK_NONE = 0,
-    CLI_TASK_RX_PARAM_SET,
-    CLI_TASK_PARAM_STORE,
-    CLI_TASK_BIND,
-    CLI_TASK_PARAM_RELOAD,
-    CLI_TASK_BOOT,
-    CLI_TASK_FLASH_ESP,
-    CLI_TASK_ESP_PASSTHROUGH,
-    CLI_TASK_ESP_CLI,
-    CLI_TASK_CHANGE_CONFIG_ID,
-} CLI_TASK_ENUM;
-
-
-class tTxCli
+//private:
+typedef enum 
 {
-  public:
-    void Init(tSerialBase* _comport);
-    void Set(uint8_t new_line_end);
-    void Do(void);
-    uint8_t Task(void);
-    int32_t GetTaskValue(void) { return task_value; }
+	CLI_STATE_NORMAL = 0,
+	CLI_STATE_STATS,
+} CLI_STATE_ENUM;
 
-  private:
-    typedef enum {
-        CLI_STATE_NORMAL = 0,
-        CLI_STATE_STATS,
-    } CLI_STATE_ENUM;
+void addc(uint8_t c);
+void clear(void);
+void print_help(void);
+void print_param(uint8_t idx);
+void print_param_list(uint8_t flag);
+void print_param_opt_list(uint8_t idx);
+void print_device_version(void);
+void print_frequencies(void);
+void stream(void);
+bool is_cmd(const char* cmd);
+bool is_cmd_param_set(char* name, char* svalue);
+bool is_cmd_set_value(const char* cmd, int32_t* value);
+void putc(char c) { com->putc(c); }
+void puts(const char* s) { com->puts(s); }
+void putsn(const char* s) { com->puts(s); com->puts(ret); }
+void print_config_id(void);
+tSerialBase* com;
+bool initialized;
+uint8_t line_end;
+char ret[4];
+char buf[128];
+uint8_t pos;
+uint32_t tlast_ms;
+uint8_t task_pending;
+int32_t task_value;
+uint8_t state;
 
-    void addc(uint8_t c);
-    void clear(void);
-    void print_help(void);
-    void print_param(uint8_t idx);
-    void print_param_list(uint8_t flag);
-    void print_param_opt_list(uint8_t idx);
-    void print_device_version(void);
-    void print_frequencies(void);
-    void stream(void);
-
-    bool is_cmd(const char* cmd);
-    bool is_cmd_param_set(char* name, char* svalue);
-    bool is_cmd_set_value(const char* cmd, int32_t* value);
-
-    void putc(char c) { com->putc(c); }
-    void puts(const char* s) { com->puts(s); }
-    void putsn(const char* s) { com->puts(s); com->puts(ret); }
-
-    void print_config_id(void);
-
-    tSerialBase* com;
-
-    bool initialized;
-
-    uint8_t line_end;
-    char ret[4];
-
-    char buf[128];
-    uint8_t pos;
-    uint32_t tlast_ms;
-
-    uint8_t task_pending;
-    int32_t task_value;
-
-    uint8_t state;
-};
-
+int32_t tTxCli_GetTaskValue(void) 
+{ 
+	return task_value; 
+}
 
 void tTxCli_Init(tSerialBase* _comport)
 {

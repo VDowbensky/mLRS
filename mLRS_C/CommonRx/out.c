@@ -16,102 +16,129 @@
 
 extern uint16_t micros(void);
 
+//private
+void OutBase_send_sbus_rcdata(tRcData* rc, bool frame_lost, bool failsafe);
+void OutBase_send_crsf_rcdata(tRcData* rc);
+void OutBase_send_crsf_linkstatistics(tOutLinkStats* lstats);
+void OutBase_do_crsf(void);
+void OutBase_putbuf(uint8_t* buf, uint16_t len);
 
-OutBase::OutBase(void)
-    : channel_order(ChannelOrder::DIRECTION_MLRS_TO_RX) // needed to construct channel_order properly
-{
-}
+//virtual void putc(char c) {}
 
+// bool config_sbus(bool enable_flag) { return false; }
+// virtual bool config_crsf(bool enable_flag) { return false; }
+// virtual bool config_sbus_inverted(bool enable_flag) { return false; }
 
-void OutBase::Init(tRxSetup* _setup)
+ChannelOrder channel_order;
+tRxSetup* setup;
+uint8_t config;
+bool initialized;
+bool link_stats_available;
+bool link_stats_set_tstart;
+uint16_t link_stats_tstart_us;
+tOutLinkStats link_stats;
+tRcData rc;
+
+//OutBase_OutBase(void)
+//    : channel_order(ChannelOrder_DIRECTION_MLRS_TO_RX) // needed to construct channel_order properly
+//{
+//}
+
+void OutBase_Init(tRxSetup* _setup)
 {
     config = UINT8_MAX;
     initialized = false;
-
     link_stats_available = false;
     link_stats_set_tstart = false;
     link_stats_tstart_us = 0;
-
     rc = {};
-
     setup = _setup;
 }
 
-
-void OutBase::Configure(uint8_t new_config)
+void OutBase_Configure(uint8_t new_config)
 {
     if (new_config == config) return;
-
     // first disable the previous setting
-    switch (config) {
-    case OUT_CONFIG_SBUS:
+    switch (config) 
+	{
+		case OUT_CONFIG_SBUS:
         config_sbus(false);
         break;
-    case OUT_CONFIG_SBUS_INVERTED:
+		
+		case OUT_CONFIG_SBUS_INVERTED:
         config_sbus_inverted(false);
         break;
-    case OUT_CONFIG_CRSF:
+		
+		case OUT_CONFIG_CRSF:
         config_crsf(false);
         break;
     }
-
     initialized = false;
-
     config = new_config;
-
-    switch (config) {
-    case OUT_CONFIG_SBUS:
+    switch (config) 
+	{
+		case OUT_CONFIG_SBUS:
         initialized = config_sbus(true);
         break;
-    case OUT_CONFIG_SBUS_INVERTED:
+		
+		case OUT_CONFIG_SBUS_INVERTED:
         initialized = config_sbus_inverted(true);
         break;
-    case OUT_CONFIG_CRSF:
+		
+		case OUT_CONFIG_CRSF:
         initialized = config_crsf(true);
         break;
     }
 }
 
-
-void OutBase::Do(void)
+void OutBase_Do(void)
 {
     if (!initialized) return;
-
-    switch (config) {
-    case OUT_CONFIG_SBUS:
-    case OUT_CONFIG_SBUS_INVERTED:
+    switch (config) 
+	{
+		case OUT_CONFIG_SBUS:
+		case OUT_CONFIG_SBUS_INVERTED:
         // nothing to do
         break;
-    case OUT_CONFIG_CRSF:
+		
+		case OUT_CONFIG_CRSF:
         do_crsf();
         break;
     }
 }
 
+OutBase_tRcData* GetRcDataPtr(void) 
+{ 
+	return &rc; 
+}
 
-void OutBase::SetChannelOrder(uint8_t new_channel_order)
+void OutBase_SetChannelOrder(uint8_t new_channel_order)
 {
     channel_order.Set(new_channel_order);
 }
 
-
-void OutBase::SendRcData(tRcData* rc_orig, bool frame_missed, bool failsafe, int8_t rssi, uint8_t lq)
+void OutBase_SendRcData(tRcData* rc_orig, bool frame_missed, bool failsafe, int8_t rssi, uint8_t lq)
 {
     memcpy(&rc, rc_orig, sizeof(tRcData)); // copy rc data, to not modify it !!
     channel_order.Apply(&rc);
 
     uint8_t failsafe_mode = setup->FailsafeMode;
 
-    if (failsafe) {
-        switch (failsafe_mode) {
-        case FAILSAFE_MODE_NO_SIGNAL:
+    if (failsafe) 
+	{
+        switch (failsafe_mode) 
+		{
+			case FAILSAFE_MODE_NO_SIGNAL:
             // do not output anything, so jump out
             return;
-        case FAILSAFE_MODE_LOW_THROTTLE:
+			
+			case FAILSAFE_MODE_LOW_THROTTLE:
             // is done below
             break;
-        case FAILSAFE_MODE_AS_CONFIGURED:
-            for (uint8_t n = 0; n < 12; n++) {
+			
+			case FAILSAFE_MODE_AS_CONFIGURED:
+            for (uint8_t n = 0; n < 12; n++) 
+			{
               int32_t v = setup->FailsafeOutChannelValues_Ch1_Ch12[n]; // -120 ... +120
               rc.ch[n] = 1024 + (v * 1023) / 120;
             }
@@ -120,23 +147,27 @@ void OutBase::SendRcData(tRcData* rc_orig, bool frame_missed, bool failsafe, int
               rc.ch[n] = (v == 0) ? 1 : (v == 2) ? 2047 : 1024;
             }
             break;
-        case FAILSAFE_MODE_LOW_THROTTLE_ELSE_CENTER:
+			
+			case FAILSAFE_MODE_LOW_THROTTLE_ELSE_CENTER:
             // do the centering here, throttle is set below
             for (uint8_t n = 0; n < RC_DATA_LEN; n++) rc.ch[n] = 1024;
             break;
-        case FAILSAFE_MODE_CH1CH4_CENTER:
+			
+			case FAILSAFE_MODE_CH1CH4_CENTER:
             for (uint8_t n = 0; n < 4; n++) rc.ch[n] = 1024; // center all four
             break;
         }
     }
-
-    if (failsafe) {
-        switch (failsafe_mode) {
-        case FAILSAFE_MODE_LOW_THROTTLE:
-        case FAILSAFE_MODE_LOW_THROTTLE_ELSE_CENTER:
+    if (failsafe) 
+	{
+        switch (failsafe_mode) 
+		{
+			case FAILSAFE_MODE_LOW_THROTTLE:
+			case FAILSAFE_MODE_LOW_THROTTLE_ELSE_CENTER:
             rc.ch[channel_order.ChannelMap(2)] = 0; // that's the minimum we can send, gives 905 on ArduPilot
             break;
-        case FAILSAFE_MODE_CH1CH4_CENTER:
+			
+			case FAILSAFE_MODE_CH1CH4_CENTER:
             // in this mode do not let sbus report bad signal
             // it's a bit an ArduPilot thing, could be achieved by setting RC_OPTIONS 4
             frame_missed = false;
@@ -144,39 +175,40 @@ void OutBase::SendRcData(tRcData* rc_orig, bool frame_missed, bool failsafe, int
             break;
         }
     }
-
-    if (setup->OutRssiChannelMode >= OUT_RSSI_LQ_CHANNEL_CH5 && setup->OutRssiChannelMode <= OUT_RSSI_LQ_CHANNEL_CH16) {
+    if (setup->OutRssiChannelMode >= OUT_RSSI_LQ_CHANNEL_CH5 && setup->OutRssiChannelMode <= OUT_RSSI_LQ_CHANNEL_CH16) 
+	{
         uint8_t rssi_channel = setup->OutRssiChannelMode + 4;
         rc.ch[rssi_channel - 1] = rssi_i8_to_ap_sbus(rssi);
     }
-
-    if (setup->OutLqChannelMode >= OUT_RSSI_LQ_CHANNEL_CH5 && setup->OutLqChannelMode <= OUT_RSSI_LQ_CHANNEL_CH16) {
+    if (setup->OutLqChannelMode >= OUT_RSSI_LQ_CHANNEL_CH5 && setup->OutLqChannelMode <= OUT_RSSI_LQ_CHANNEL_CH16) 
+	{
         uint8_t lq_channel = setup->OutLqChannelMode + 4;
         rc.ch[lq_channel - 1] = lq_to_sbus_crsf(lq);
     }
-
     if (!initialized) return;
-
-    switch (config) {
-    case OUT_CONFIG_SBUS:
-    case OUT_CONFIG_SBUS_INVERTED:
+    switch (config) 
+	{
+		case OUT_CONFIG_SBUS:
+		case OUT_CONFIG_SBUS_INVERTED:
         send_sbus_rcdata(&rc, frame_missed, failsafe);
         break;
-    case OUT_CONFIG_CRSF:
+		
+		case OUT_CONFIG_CRSF:
         send_crsf_rcdata(&rc);
         break;
     }
 }
 
-
-void OutBase::SendLinkStatistics(tOutLinkStats* lstats)
+void OutBase_SendLinkStatistics(tOutLinkStats* lstats)
 {
-    switch (config) {
-    case OUT_CONFIG_SBUS:
-    case OUT_CONFIG_SBUS_INVERTED:
+    switch (config) 
+	{
+		case OUT_CONFIG_SBUS:
+		case OUT_CONFIG_SBUS_INVERTED:
         // nothing to send
         break;
-    case OUT_CONFIG_CRSF:
+		
+		case OUT_CONFIG_CRSF:
         memcpy(&link_stats, lstats, sizeof(tOutLinkStats));
         link_stats_available = true;
         link_stats_set_tstart = true;
@@ -184,14 +216,15 @@ void OutBase::SendLinkStatistics(tOutLinkStats* lstats)
     }
 }
 
-
-void OutBase::SendLinkStatisticsDisconnected(void)
+void OutBase_SendLinkStatisticsDisconnected(void)
 {
-    switch (config) {
-    case OUT_CONFIG_SBUS:
-    case OUT_CONFIG_SBUS_INVERTED:
+    switch (config) 
+	{
+		case OUT_CONFIG_SBUS:
+		case OUT_CONFIG_SBUS_INVERTED:
         break;
-    case OUT_CONFIG_CRSF:
+		
+		case OUT_CONFIG_CRSF:
         link_stats.receiver_rssi1 = RSSI_MIN;
         link_stats.receiver_rssi2 = RSSI_MIN;
         link_stats.receiver_LQ = 0;
@@ -204,27 +237,23 @@ void OutBase::SendLinkStatisticsDisconnected(void)
         link_stats.transmitter_snr = 0;
         link_stats.transmitter_antenna = 0;
         link_stats.transmitter_transmit_antenna = 0;
-
         link_stats_available = true;
         link_stats_set_tstart = true;
         break;
     }
 }
 
-
-void OutBase::putbuf(uint8_t* buf, uint16_t len)
+void OutBase_putbuf(uint8_t* buf, uint16_t len)
 {
     for (uint16_t i = 0; i < len; i++) putc(buf[i]);
 }
 
-
 //-------------------------------------------------------
 // SBus
 //-------------------------------------------------------
-
-void OutBase::send_sbus_rcdata(tRcData* rc, bool frame_lost, bool failsafe)
+void OutBase_send_sbus_rcdata(tRcData* rc, bool frame_lost, bool failsafe)
 {
-tSBusChannelBuffer sbus_buf;
+	tSBusChannelBuffer sbus_buf;
 
     // chX = (((int32_t)(rc->ch[X]) - 1024) * 1920) / 2047 + 1000;
     sbus_buf.ch0 = rc_to_sbus(rc->ch[0]);
@@ -249,22 +278,18 @@ tSBusChannelBuffer sbus_buf;
     if (rc->ch[17] >= 1450) flags |= SBUS_FLAG_CH18;
     if (frame_lost) flags |= SBUS_FLAG_FRAME_LOST;
     if (failsafe) flags |= SBUS_FLAG_FAILSAFE;
-
     putc(SBUS_STX);
     putbuf(sbus_buf.c, SBUS_CHANNELPACKET_SIZE);
     putc(flags);
     putc(SBUS_END_STX);
 }
 
-
 //-------------------------------------------------------
 // Crsf
 //-------------------------------------------------------
-
-void OutBase::send_crsf_rcdata(tRcData* rc)
+void OutBase_send_crsf_rcdata(tRcData* rc)
 {
-tCrsfChannelBuffer crsf_buf;
-
+	tCrsfChannelBuffer crsf_buf;
     // chX = (((int32_t)(rc->ch[X]) - 1024) * 1920) / 2047 + 1000;
     crsf_buf.ch0 = rc_to_crsf(rc->ch[0]);
     crsf_buf.ch1 = rc_to_crsf(rc->ch[1]);
@@ -287,28 +312,29 @@ tCrsfChannelBuffer crsf_buf;
 
     putc(CRSF_ADDRESS_FLIGHT_CONTROLLER); // was CRSF_ADDRESS_BROADCAST, but ArduPilot changed in 4.5, @d5ba0b6
     putc(CRSF_CHANNELPACKET_SIZE + 2);
-
     putc(CRSF_FRAME_ID_CHANNELS);
     crc = crsf_crc8_calc(crc, CRSF_FRAME_ID_CHANNELS);
-
     putbuf(crsf_buf.c, CRSF_CHANNELPACKET_SIZE);
     crc = crsf_crc8_update(crc, crsf_buf.c, CRSF_CHANNELPACKET_SIZE);
-
     putc(crc);
 }
 
-
-void OutBase::send_crsf_linkstatistics(tOutLinkStats* lstats)
+void OutBase_send_crsf_linkstatistics(tOutLinkStats* lstats)
 {
-tCrsfLinkStatistics clstats;
+	tCrsfLinkStatistics clstats;
 
-    if (lstats->antenna_config == 3) {
+    if (lstats->antenna_config == 3) 
+	{
         clstats.uplink_rssi1 = crsf_cvt_rssi_rx(lstats->receiver_rssi1);
         clstats.uplink_rssi2 = crsf_cvt_rssi_rx(lstats->receiver_rssi2);
-    } else if (lstats->antenna_config == 2) {
+    } 
+	else if (lstats->antenna_config == 2) 
+	{
         clstats.uplink_rssi1 = 255;
         clstats.uplink_rssi2 = crsf_cvt_rssi_rx(lstats->receiver_rssi2);
-    } else {
+    } 
+	else 
+	{
         clstats.uplink_rssi1 = crsf_cvt_rssi_rx(lstats->receiver_rssi1);
         clstats.uplink_rssi2 = 255;
     }
@@ -325,35 +351,33 @@ tCrsfLinkStatistics clstats;
 
     putc(CRSF_ADDRESS_FLIGHT_CONTROLLER);
     putc(CRSF_LINK_STATISTICS_LEN + 2);
-
     putc(CRSF_FRAME_ID_LINK_STATISTICS);
     crc = crsf_crc8_calc(crc, CRSF_FRAME_ID_LINK_STATISTICS);
-
     putbuf((uint8_t*)&clstats, CRSF_LINK_STATISTICS_LEN);
     crc = crsf_crc8_update(crc, &clstats, CRSF_LINK_STATISTICS_LEN);
-
     putc(crc);
 }
 
 
-void OutBase::do_crsf(void)
+void OutBase_do_crsf(void)
 {
     if (!link_stats_available) return;
 
     uint16_t tnow_us = micros();
 
-    if (link_stats_set_tstart) {
+    if (link_stats_set_tstart) 
+	{
         link_stats_tstart_us = tnow_us;
         link_stats_set_tstart = false;
     }
-
     uint16_t dt = tnow_us - link_stats_tstart_us;
-    if (dt > 4000) {
+	
+    if (dt > 4000) 
+	{
         link_stats_available = false;
         send_crsf_linkstatistics(&link_stats);
     }
 }
-
 
 //-------------------------------------------------------
 // FPort
@@ -381,6 +405,3 @@ void OutBase::do_crsf(void)
 //SUMD, https://www.deviationtx.com/media/kunena/attachments/98/HoTT-SUMD-Spec-REV01-12062012-pdf.pdf
 // 115200 bps, 8N1
 // 0xA8, 0x01 or 0x00 or 0x81, len byte, u16 x channels bytes, 2 crc byte, telem, crc8
-
-
-

@@ -8,8 +8,6 @@
 //********************************************************
 #ifndef OUT_H
 #define OUT_H
-#pragma once
-
 
 #include <inttypes.h>
 #include "../Common/common_types.h"
@@ -17,11 +15,9 @@
 #include "../Common/setup_types.h"
 #include "../Common/channel_order.h"
 
-
 //-------------------------------------------------------
 // Generic Out Class
-//-------------------------------------------------------
-
+/
 typedef struct
 {
     int8_t receiver_rssi1;
@@ -41,50 +37,13 @@ typedef struct
 } tOutLinkStats;
 
 
-class OutBase
-{
-  public:
-    OutBase(void);
-
-    void Init(tRxSetup* _setup);
-
-    void Configure(uint8_t new_config);
-
-    void Do(void);
-
-    void SendRcData(tRcData* rc, bool frame_lost, bool failsafe, int8_t rssi, uint8_t lq);
-    void SendLinkStatistics(tOutLinkStats* lstats);
-    void SendLinkStatisticsDisconnected(void);
-
-    void SetChannelOrder(uint8_t new_channel_order);
-
-    tRcData* GetRcDataPtr(void) { return &rc; }
-
-  private:
-    void send_sbus_rcdata(tRcData* rc, bool frame_lost, bool failsafe);
-    void send_crsf_rcdata(tRcData* rc);
-    void send_crsf_linkstatistics(tOutLinkStats* lstats);
-    void do_crsf(void);
-
-    void putbuf(uint8_t* buf, uint16_t len);
-
-    virtual void putc(char c) {}
-    virtual bool config_sbus(bool enable_flag) { return false; }
-    virtual bool config_crsf(bool enable_flag) { return false; }
-    virtual bool config_sbus_inverted(bool enable_flag) { return false; }
-
-    ChannelOrder channel_order;
-    tRxSetup* setup;
-    uint8_t config;
-    bool initialized;
-
-    bool link_stats_available;
-    bool link_stats_set_tstart;
-    uint16_t link_stats_tstart_us;
-    tOutLinkStats link_stats;
-
-    tRcData rc;
-};
-
+void OutBase_Init(tRxSetup* _setup);
+void OutBase_Configure(uint8_t new_config);
+void OutBase_Do(void);
+void OutBase_SendRcData(tRcData* rc, bool frame_lost, bool failsafe, int8_t rssi, uint8_t lq);
+void OutBase_SendLinkStatistics(tOutLinkStats* lstats);
+void OutBase_SendLinkStatisticsDisconnected(void);
+void OutBase_SetChannelOrder(uint8_t new_channel_order);
+OutBase_tRcData* GetRcDataPtr(void);
 
 #endif // OUT_H

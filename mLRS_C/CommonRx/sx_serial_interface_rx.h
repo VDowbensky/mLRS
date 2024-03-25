@@ -8,48 +8,11 @@
 //********************************************************
 #ifndef SX_SERIAL_INTERFACE_RX_H
 #define SX_SERIAL_INTERFACE_TX_H
-#pragma once
 
-
-class tRxSxSerial : public tSerialBase
-{
-  public:
-      void Init(void)
-      {
-          tSerialBase::Init();
-      }
-
-      virtual bool available(void)
-      {
-          if (SERIAL_LINK_MODE_IS_MAVLINK(Setup.Rx.SerialLinkMode)) {
-              return mavlink.available(); // get from serial via mavlink parser
-          }
-          return serial.available(); // get from serial
-      }
-
-      virtual char getc(void)
-      {
-          if (SERIAL_LINK_MODE_IS_MAVLINK(Setup.Rx.SerialLinkMode)) {
-              return mavlink.getc(); // get from serial via mavlink parser
-          }
-          return serial.getc(); // get from serial
-      }
-
-      virtual void flush(void)
-      {
-          mavlink.flush(); // we don't distinguish here, can't harm to always flush mavlink handler
-          serial.flush();
-      }
-
-      virtual void putc(char c)
-      {
-          if (SERIAL_LINK_MODE_IS_MAVLINK(Setup.Rx.SerialLinkMode)) {
-              mavlink.putc(c); // send to serial via mavlink parser
-          } else {
-              serial.putc(c); // send to serial
-          }
-      }
-};
-
+void tRxSxSerial_Init(void);
+bool tRxSxSerial_available(void);
+char tRxSxSerial_getc(void);
+void tRxSxSerial_flush(void);
+void tRxSxSerial_ putc(char c);
 
 #endif // SX_SERIAL_INTERFACE_RX_H
