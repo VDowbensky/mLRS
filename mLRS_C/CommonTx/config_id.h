@@ -8,8 +8,6 @@
 //********************************************************
 #ifndef CONFIGID_H
 #define CONFIGID_H
-#pragma once
-
 
 #include <inttypes.h>
 
@@ -18,18 +16,8 @@
 // Generic ConfigId Class
 //-------------------------------------------------------
 
-class tConfigId
-{
-  public:
-    void Init(void);
-    void Change(uint8_t config_id);
-    bool Do(void);
-
-  private:
-    uint32_t change_tlast_ms;
-    uint8_t new_config_id;
-};
-
-
+void tConfigId_Init(void);
+void tConfigId_Change(uint8_t config_id);
+bool tConfigId_Do(void);
 
 #endif // CONFIGID_H
