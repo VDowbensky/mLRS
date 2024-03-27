@@ -50,18 +50,27 @@ extern "C" {
 
 #ifndef FASTMAVLINK_TEST_EXCLUDE_ENUMS
 
-#ifndef FASTMAVLINK_HAS_ENUM_RADIO_LINK_TYPE
-#define FASTMAVLINK_HAS_ENUM_RADIO_LINK_TYPE
-typedef enum RADIO_LINK_TYPE {
-    RADIO_LINK_TYPE_GENERIC = 0,  // Unknown radio link type. 
-    RADIO_LINK_TYPE_HERELINK = 1,  // Radio link is HereLink. 
-    RADIO_LINK_TYPE_DRAGONLINK = 2,  // Radio link is Dragon Link. 
-    RADIO_LINK_TYPE_RFD900 = 3,  // Radio link is RFD900. 
-    RADIO_LINK_TYPE_CROSSFIRE = 4,  // Radio link is Crossfire. 
-    RADIO_LINK_TYPE_EXPRESSLRS = 5,  // Radio link is ExpressLRS. 
-    RADIO_LINK_TYPE_MLRS = 6,  // Radio link is mLRS. 
-    RADIO_LINK_TYPE_ENUM_END = 7,  // end marker
-} RADIO_LINK_TYPE;
+#ifndef FASTMAVLINK_HAS_ENUM_RADIO_LINK_STATS_FLAGS_DEV
+#define FASTMAVLINK_HAS_ENUM_RADIO_LINK_STATS_FLAGS_DEV
+typedef enum RADIO_LINK_STATS_FLAGS_DEV {
+    RADIO_LINK_STATS_FLAGS_RSSI_DBM_DEV = 1,  // Rssi values are in negative dBm. Values 0..253 corresponds to 0..-253 dBm. 254 represents no link connection. 
+    RADIO_LINK_STATS_FLAGS_DEV_ENUM_END = 2,  // end marker
+} RADIO_LINK_STATS_FLAGS_DEV;
+#endif
+
+
+#ifndef FASTMAVLINK_HAS_ENUM_RADIO_LINK_TYPE_DEV
+#define FASTMAVLINK_HAS_ENUM_RADIO_LINK_TYPE_DEV
+typedef enum RADIO_LINK_TYPE_DEV {
+    RADIO_LINK_TYPE_GENERIC_DEV = 0,  // Unknown radio link type. 
+    RADIO_LINK_TYPE_HERELINK_DEV = 1,  // Radio link is HereLink. 
+    RADIO_LINK_TYPE_DRAGONLINK_DEV = 2,  // Radio link is Dragon Link. 
+    RADIO_LINK_TYPE_RFD900_DEV = 3,  // Radio link is RFD900. 
+    RADIO_LINK_TYPE_CROSSFIRE_DEV = 4,  // Radio link is Crossfire. 
+    RADIO_LINK_TYPE_EXPRESSLRS_DEV = 5,  // Radio link is ExpressLRS. 
+    RADIO_LINK_TYPE_MLRS_DEV = 6,  // Radio link is mLRS. 
+    RADIO_LINK_TYPE_DEV_ENUM_END = 7,  // end marker
+} RADIO_LINK_TYPE_DEV;
 #endif
 
 #endif // FASTMAVLINK_DO_NOT_INCLUDE_ENUMS
@@ -80,7 +89,7 @@ typedef enum RADIO_LINK_TYPE {
 
 #include "./mavlink_msg_autopilot_state_for_gimbal_device_ext.h"
 #include "./mavlink_msg_radio_link_flow_control.h"
-#include "./mavlink_msg_radio_rc_channels_dev.h"
+#include "./mavlink_msg_radio_link_stats_mlrs.h"
 #include "./mavlink_msg_radio_link_stats_dev.h"
 #include "./mavlink_msg_radio_link_information_dev.h"
 

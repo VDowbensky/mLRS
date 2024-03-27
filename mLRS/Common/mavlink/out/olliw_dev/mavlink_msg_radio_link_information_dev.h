@@ -15,12 +15,16 @@
 // fields are ordered, as they appear on the wire
 FASTMAVLINK_PACK(
 typedef struct _fmav_radio_link_information_dev_t {
-    uint16_t tx_rate;
-    uint16_t rx_rate;
+    uint16_t tx_packet_rate;
+    uint16_t rx_packet_rate;
+    uint16_t tx_ser_data_rate;
+    uint16_t rx_ser_data_rate;
     uint8_t target_system;
     uint8_t target_component;
     uint8_t type;
     uint8_t mode;
+    int8_t tx_power;
+    int8_t rx_power;
     uint8_t tx_receive_sensitivity;
     uint8_t rx_receive_sensitivity;
 }) fmav_radio_link_information_dev_t;
@@ -28,25 +32,29 @@ typedef struct _fmav_radio_link_information_dev_t {
 
 #define FASTMAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV  422
 
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_PAYLOAD_LEN_MAX  10
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_CRCEXTRA  9
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_PAYLOAD_LEN_MAX  16
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_CRCEXTRA  172
 
 #define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FLAGS  3
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_TARGET_SYSTEM_OFS  4
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_TARGET_COMPONENT_OFS  5
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_TARGET_SYSTEM_OFS  8
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_TARGET_COMPONENT_OFS  9
 
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FRAME_LEN_MAX  35
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FRAME_LEN_MAX  41
 
 
 
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TX_RATE_OFS  0
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_RX_RATE_OFS  2
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TARGET_SYSTEM_OFS  4
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TARGET_COMPONENT_OFS  5
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TYPE_OFS  6
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_MODE_OFS  7
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TX_RECEIVE_SENSITIVITY_OFS  8
-#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_RX_RECEIVE_SENSITIVITY_OFS  9
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TX_PACKET_RATE_OFS  0
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_RX_PACKET_RATE_OFS  2
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TX_SER_DATA_RATE_OFS  4
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_RX_SER_DATA_RATE_OFS  6
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TARGET_SYSTEM_OFS  8
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TARGET_COMPONENT_OFS  9
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TYPE_OFS  10
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_MODE_OFS  11
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TX_POWER_OFS  12
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_RX_POWER_OFS  13
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_TX_RECEIVE_SENSITIVITY_OFS  14
+#define FASTMAVLINK_MSG_RADIO_LINK_INFORMATION_DEV_FIELD_RX_RECEIVE_SENSITIVITY_OFS  15
 
 
 //----------------------------------------
@@ -57,17 +65,21 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_pack
     fmav_message_t* _msg,
     uint8_t sysid,
     uint8_t compid,
-    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, uint16_t tx_rate, uint16_t rx_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity,
+    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, int8_t tx_power, int8_t rx_power, uint16_t tx_packet_rate, uint16_t rx_packet_rate, uint16_t tx_ser_data_rate, uint16_t rx_ser_data_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity,
     fmav_status_t* _status)
 {
     fmav_radio_link_information_dev_t* _payload = (fmav_radio_link_information_dev_t*)_msg->payload;
 
-    _payload->tx_rate = tx_rate;
-    _payload->rx_rate = rx_rate;
+    _payload->tx_packet_rate = tx_packet_rate;
+    _payload->rx_packet_rate = rx_packet_rate;
+    _payload->tx_ser_data_rate = tx_ser_data_rate;
+    _payload->rx_ser_data_rate = rx_ser_data_rate;
     _payload->target_system = target_system;
     _payload->target_component = target_component;
     _payload->type = type;
     _payload->mode = mode;
+    _payload->tx_power = tx_power;
+    _payload->rx_power = rx_power;
     _payload->tx_receive_sensitivity = tx_receive_sensitivity;
     _payload->rx_receive_sensitivity = rx_receive_sensitivity;
 
@@ -93,7 +105,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_enco
 {
     return fmav_msg_radio_link_information_dev_pack(
         _msg, sysid, compid,
-        _payload->target_system, _payload->target_component, _payload->type, _payload->mode, _payload->tx_rate, _payload->rx_rate, _payload->tx_receive_sensitivity, _payload->rx_receive_sensitivity,
+        _payload->target_system, _payload->target_component, _payload->type, _payload->mode, _payload->tx_power, _payload->rx_power, _payload->tx_packet_rate, _payload->rx_packet_rate, _payload->tx_ser_data_rate, _payload->rx_ser_data_rate, _payload->tx_receive_sensitivity, _payload->rx_receive_sensitivity,
         _status);
 }
 
@@ -102,17 +114,21 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_pack
     uint8_t* _buf,
     uint8_t sysid,
     uint8_t compid,
-    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, uint16_t tx_rate, uint16_t rx_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity,
+    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, int8_t tx_power, int8_t rx_power, uint16_t tx_packet_rate, uint16_t rx_packet_rate, uint16_t tx_ser_data_rate, uint16_t rx_ser_data_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity,
     fmav_status_t* _status)
 {
     fmav_radio_link_information_dev_t* _payload = (fmav_radio_link_information_dev_t*)(&_buf[FASTMAVLINK_HEADER_V2_LEN]);
 
-    _payload->tx_rate = tx_rate;
-    _payload->rx_rate = rx_rate;
+    _payload->tx_packet_rate = tx_packet_rate;
+    _payload->rx_packet_rate = rx_packet_rate;
+    _payload->tx_ser_data_rate = tx_ser_data_rate;
+    _payload->rx_ser_data_rate = rx_ser_data_rate;
     _payload->target_system = target_system;
     _payload->target_component = target_component;
     _payload->type = type;
     _payload->mode = mode;
+    _payload->tx_power = tx_power;
+    _payload->rx_power = rx_power;
     _payload->tx_receive_sensitivity = tx_receive_sensitivity;
     _payload->rx_receive_sensitivity = rx_receive_sensitivity;
 
@@ -140,7 +156,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_enco
 {
     return fmav_msg_radio_link_information_dev_pack_to_frame_buf(
         _buf, sysid, compid,
-        _payload->target_system, _payload->target_component, _payload->type, _payload->mode, _payload->tx_rate, _payload->rx_rate, _payload->tx_receive_sensitivity, _payload->rx_receive_sensitivity,
+        _payload->target_system, _payload->target_component, _payload->type, _payload->mode, _payload->tx_power, _payload->rx_power, _payload->tx_packet_rate, _payload->rx_packet_rate, _payload->tx_ser_data_rate, _payload->rx_ser_data_rate, _payload->tx_receive_sensitivity, _payload->rx_receive_sensitivity,
         _status);
 }
 
@@ -150,17 +166,21 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_enco
 FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_pack_to_serial(
     uint8_t sysid,
     uint8_t compid,
-    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, uint16_t tx_rate, uint16_t rx_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity,
+    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, int8_t tx_power, int8_t rx_power, uint16_t tx_packet_rate, uint16_t rx_packet_rate, uint16_t tx_ser_data_rate, uint16_t rx_ser_data_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity,
     fmav_status_t* _status)
 {
     fmav_radio_link_information_dev_t _payload;
 
-    _payload.tx_rate = tx_rate;
-    _payload.rx_rate = rx_rate;
+    _payload.tx_packet_rate = tx_packet_rate;
+    _payload.rx_packet_rate = rx_packet_rate;
+    _payload.tx_ser_data_rate = tx_ser_data_rate;
+    _payload.rx_ser_data_rate = rx_ser_data_rate;
     _payload.target_system = target_system;
     _payload.target_component = target_component;
     _payload.type = type;
     _payload.mode = mode;
+    _payload.tx_power = tx_power;
+    _payload.rx_power = rx_power;
     _payload.tx_receive_sensitivity = tx_receive_sensitivity;
     _payload.rx_receive_sensitivity = rx_receive_sensitivity;
 
@@ -221,7 +241,7 @@ FASTMAVLINK_FUNCTION_DECORATOR void fmav_msg_radio_link_information_dev_decode(f
 }
 
 
-FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_field_tx_rate(const fmav_message_t* msg)
+FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_field_tx_packet_rate(const fmav_message_t* msg)
 {
     uint16_t r;
     memcpy(&r, &(msg->payload[0]), sizeof(uint16_t));
@@ -229,7 +249,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_
 }
 
 
-FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_field_rx_rate(const fmav_message_t* msg)
+FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_field_rx_packet_rate(const fmav_message_t* msg)
 {
     uint16_t r;
     memcpy(&r, &(msg->payload[2]), sizeof(uint16_t));
@@ -237,39 +257,23 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_
 }
 
 
+FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_field_tx_ser_data_rate(const fmav_message_t* msg)
+{
+    uint16_t r;
+    memcpy(&r, &(msg->payload[4]), sizeof(uint16_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmav_msg_radio_link_information_dev_get_field_rx_ser_data_rate(const fmav_message_t* msg)
+{
+    uint16_t r;
+    memcpy(&r, &(msg->payload[6]), sizeof(uint16_t));
+    return r;
+}
+
+
 FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_target_system(const fmav_message_t* msg)
-{
-    uint8_t r;
-    memcpy(&r, &(msg->payload[4]), sizeof(uint8_t));
-    return r;
-}
-
-
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_target_component(const fmav_message_t* msg)
-{
-    uint8_t r;
-    memcpy(&r, &(msg->payload[5]), sizeof(uint8_t));
-    return r;
-}
-
-
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_type(const fmav_message_t* msg)
-{
-    uint8_t r;
-    memcpy(&r, &(msg->payload[6]), sizeof(uint8_t));
-    return r;
-}
-
-
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_mode(const fmav_message_t* msg)
-{
-    uint8_t r;
-    memcpy(&r, &(msg->payload[7]), sizeof(uint8_t));
-    return r;
-}
-
-
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_tx_receive_sensitivity(const fmav_message_t* msg)
 {
     uint8_t r;
     memcpy(&r, &(msg->payload[8]), sizeof(uint8_t));
@@ -277,10 +281,58 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_f
 }
 
 
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_rx_receive_sensitivity(const fmav_message_t* msg)
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_target_component(const fmav_message_t* msg)
 {
     uint8_t r;
     memcpy(&r, &(msg->payload[9]), sizeof(uint8_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_type(const fmav_message_t* msg)
+{
+    uint8_t r;
+    memcpy(&r, &(msg->payload[10]), sizeof(uint8_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_mode(const fmav_message_t* msg)
+{
+    uint8_t r;
+    memcpy(&r, &(msg->payload[11]), sizeof(uint8_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR int8_t fmav_msg_radio_link_information_dev_get_field_tx_power(const fmav_message_t* msg)
+{
+    int8_t r;
+    memcpy(&r, &(msg->payload[12]), sizeof(int8_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR int8_t fmav_msg_radio_link_information_dev_get_field_rx_power(const fmav_message_t* msg)
+{
+    int8_t r;
+    memcpy(&r, &(msg->payload[13]), sizeof(int8_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_tx_receive_sensitivity(const fmav_message_t* msg)
+{
+    uint8_t r;
+    memcpy(&r, &(msg->payload[14]), sizeof(uint8_t));
+    return r;
+}
+
+
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_field_rx_receive_sensitivity(const fmav_message_t* msg)
+{
+    uint8_t r;
+    memcpy(&r, &(msg->payload[15]), sizeof(uint8_t));
     return r;
 }
 
@@ -297,13 +349,13 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmav_msg_radio_link_information_dev_get_f
 
 #define mavlink_radio_link_information_dev_t  fmav_radio_link_information_dev_t
 
-#define MAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV_LEN  10
-#define MAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV_MIN_LEN  10
-#define MAVLINK_MSG_ID_422_LEN  10
-#define MAVLINK_MSG_ID_422_MIN_LEN  10
+#define MAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV_LEN  16
+#define MAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV_MIN_LEN  16
+#define MAVLINK_MSG_ID_422_LEN  16
+#define MAVLINK_MSG_ID_422_MIN_LEN  16
 
-#define MAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV_CRC  9
-#define MAVLINK_MSG_ID_422_CRC  9
+#define MAVLINK_MSG_ID_RADIO_LINK_INFORMATION_DEV_CRC  172
+#define MAVLINK_MSG_ID_422_CRC  172
 
 
 
@@ -314,12 +366,12 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t mavlink_msg_radio_link_information_dev_p
     uint8_t sysid,
     uint8_t compid,
     mavlink_message_t* _msg,
-    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, uint16_t tx_rate, uint16_t rx_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity)
+    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, int8_t tx_power, int8_t rx_power, uint16_t tx_packet_rate, uint16_t rx_packet_rate, uint16_t tx_ser_data_rate, uint16_t rx_ser_data_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity)
 {
     fmav_status_t* _status = mavlink_get_channel_status(MAVLINK_COMM_0);
     return fmav_msg_radio_link_information_dev_pack(
         _msg, sysid, compid,
-        target_system, target_component, type, mode, tx_rate, rx_rate, tx_receive_sensitivity, rx_receive_sensitivity,
+        target_system, target_component, type, mode, tx_power, rx_power, tx_packet_rate, rx_packet_rate, tx_ser_data_rate, rx_ser_data_rate, tx_receive_sensitivity, rx_receive_sensitivity,
         _status);
 }
 
@@ -334,7 +386,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t mavlink_msg_radio_link_information_dev_e
         sysid,
         compid,
         _msg,
-        _payload->target_system, _payload->target_component, _payload->type, _payload->mode, _payload->tx_rate, _payload->rx_rate, _payload->tx_receive_sensitivity, _payload->rx_receive_sensitivity);
+        _payload->target_system, _payload->target_component, _payload->type, _payload->mode, _payload->tx_power, _payload->rx_power, _payload->tx_packet_rate, _payload->rx_packet_rate, _payload->tx_ser_data_rate, _payload->rx_ser_data_rate, _payload->tx_receive_sensitivity, _payload->rx_receive_sensitivity);
 }
 
 #endif
@@ -345,13 +397,13 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t mavlink_msg_radio_link_information_dev_p
     fmav_status_t* _status,
     uint8_t sysid,
     uint8_t compid,
-    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, uint16_t tx_rate, uint16_t rx_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity)
+    uint8_t target_system, uint8_t target_component, uint8_t type, uint8_t mode, int8_t tx_power, int8_t rx_power, uint16_t tx_packet_rate, uint16_t rx_packet_rate, uint16_t tx_ser_data_rate, uint16_t rx_ser_data_rate, uint8_t tx_receive_sensitivity, uint8_t rx_receive_sensitivity)
 {
     return fmav_msg_radio_link_information_dev_pack_to_frame_buf(
         (uint8_t*)_buf,
         sysid,
         compid,
-        target_system, target_component, type, mode, tx_rate, rx_rate, tx_receive_sensitivity, rx_receive_sensitivity,
+        target_system, target_component, type, mode, tx_power, rx_power, tx_packet_rate, rx_packet_rate, tx_ser_data_rate, rx_ser_data_rate, tx_receive_sensitivity, rx_receive_sensitivity,
         _status);
 }
 
