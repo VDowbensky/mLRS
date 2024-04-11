@@ -1,0 +1,5 @@
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:763:22:LL_AHB3_GRP1_ForceReset	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:806:22:LL_AHB3_GRP1_ReleaseReset	1
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_rng.c:82:13:LL_RNG_DeInit	1
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_rng.c:103:13:LL_RNG_Init	1
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_rng.c:123:6:LL_RNG_StructInit	1

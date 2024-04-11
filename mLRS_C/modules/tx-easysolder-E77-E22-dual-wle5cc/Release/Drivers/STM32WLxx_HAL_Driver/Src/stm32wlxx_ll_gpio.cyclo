@@ -1,0 +1,4 @@
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_gpio.h:278:22:LL_GPIO_SetPinMode	1
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_gpio.c:103:13:LL_GPIO_DeInit	5
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_gpio.c:150:13:LL_GPIO_Init	6
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_gpio.c:230:6:LL_GPIO_StructInit	1

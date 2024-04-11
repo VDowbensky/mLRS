@@ -1,0 +1,5 @@
+D:/mLRS/mLRS/CommonTx/in.cpp:25:6:void InBase::Init(bool)	0	static
+D:/mLRS/mLRS/CommonTx/in.cpp:37:6:void InBase::Configure(uint8_t)	16	static
+D:/mLRS/mLRS/CommonTx/in.cpp:122:6:void InBase::get_sbus_data(tRcData*)	72	static
+D:/mLRS/mLRS/CommonTx/in.cpp:85:6:bool InBase::parse_sbus(tRcData*)	24	static
+D:/mLRS/mLRS/CommonTx/in.cpp:67:6:bool InBase::Update(tRcData*)	0	static

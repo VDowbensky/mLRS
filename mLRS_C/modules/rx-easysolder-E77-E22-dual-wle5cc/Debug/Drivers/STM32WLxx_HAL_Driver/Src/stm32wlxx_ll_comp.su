@@ -1,0 +1,4 @@
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_comp.h:696:26:LL_COMP_IsLocked	16	static
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_comp.c:130:13:LL_COMP_DeInit	24	static
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_comp.c:167:13:LL_COMP_Init	24	static
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_comp.c:226:6:LL_COMP_StructInit	16	static

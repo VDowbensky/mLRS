@@ -1,0 +1,4 @@
+D:/mLRS/mLRS/Common/channel_order.cpp:14:1:ChannelOrder::ChannelOrder(uint8_t)	1
+D:/mLRS/mLRS/Common/channel_order.cpp:22:6:void ChannelOrder::Set(uint8_t)	7
+D:/mLRS/mLRS/Common/channel_order.cpp:63:6:void ChannelOrder::Apply(tRcData*)	2
+D:/mLRS/mLRS/Common/channel_order.cpp:78:9:uint8_t ChannelOrder::ChannelMap(uint8_t)	1

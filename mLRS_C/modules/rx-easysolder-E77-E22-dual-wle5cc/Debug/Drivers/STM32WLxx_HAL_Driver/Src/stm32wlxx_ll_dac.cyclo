@@ -1,0 +1,6 @@
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:1062:22:LL_APB1_GRP1_ForceReset	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:1107:22:LL_APB1_GRP1_ReleaseReset	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_dac.h:1242:26:LL_DAC_IsEnabled	2
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_dac.c:138:13:LL_DAC_DeInit	1
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_dac.c:176:13:LL_DAC_Init	3
+../Drivers/STM32WLxx_HAL_Driver/Src/stm32wlxx_ll_dac.c:256:6:LL_DAC_StructInit	1

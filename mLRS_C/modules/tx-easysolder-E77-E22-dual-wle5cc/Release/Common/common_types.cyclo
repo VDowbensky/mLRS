@@ -1,0 +1,33 @@
+D:/mLRS/mLRS/Common/common_types.cpp:19:9:uint8_t rssi_u7_from_i8(int8_t)	4
+D:/mLRS/mLRS/Common/common_types.cpp:31:8:int8_t rssi_i8_from_u7(uint8_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:59:9:uint8_t rssi_i8_to_ap(int8_t)	4
+D:/mLRS/mLRS/Common/common_types.cpp:73:9:uint8_t rssi_i8_to_mavradio(int8_t, bool)	4
+D:/mLRS/mLRS/Common/common_types.cpp:83:10:uint16_t rssi_i8_to_ap_sbus(int8_t)	4
+D:/mLRS/mLRS/Common/common_types.cpp:97:10:uint16_t lq_to_sbus_crsf(uint8_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:107:10:uint16_t clip_rc(int32_t)	3
+D:/mLRS/mLRS/Common/common_types.cpp:115:10:uint16_t rc_from_sbus(uint16_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:121:10:uint16_t rc_from_crsf(uint16_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:127:10:uint16_t rc_to_sbus(uint16_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:133:10:uint16_t rc_to_crsf(uint16_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:139:10:uint16_t rc_to_mavlink(uint16_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:145:9:int16_t rc_to_mavlink_13bcentered(uint16_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:154:9:uint8_t crsf_cvt_power(int8_t)	9
+D:/mLRS/mLRS/Common/common_types.cpp:169:9:uint8_t crsf_cvt_mode(uint8_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:180:9:uint8_t crsf_cvt_fps(uint8_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:192:9:uint8_t crsf_cvt_rssi_rx(int8_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:200:9:uint8_t crsf_cvt_rssi_tx(int8_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:281:9:uint8_t crsf_crc8_calc(uint8_t, uint8_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:287:9:uint8_t crsf_crc8_update(uint8_t, const void*, uint16_t)	3
+D:/mLRS/mLRS/Common/common_types.cpp:302:6:bool is_valid_bindphrase_char(char)	4
+D:/mLRS/mLRS/Common/common_types.cpp:310:6:void sanitize_bindphrase(char*, const char*)	6
+D:/mLRS/mLRS/Common/common_types.cpp:326:10:uint32_t u32_from_bindphrase(char*)	3
+D:/mLRS/mLRS/Common/common_types.cpp:344:9:uint8_t except_from_bindphrase(char*)	3
+D:/mLRS/mLRS/Common/common_types.cpp:359:6:void remove_leading_zeros(char*)	3
+D:/mLRS/mLRS/Common/common_types.cpp:371:6:void power_optstr_from_power_list(char*, int16_t*, uint8_t, uint8_t)	7
+D:/mLRS/mLRS/Common/common_types.cpp:409:6:void power_optstr_from_rfpower_list(char*, const rfpower_t*, uint8_t, uint8_t)	2
+D:/mLRS/mLRS/Common/common_types.cpp:421:10:uint16_t version_to_u16(uint32_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:433:10:uint32_t version_from_u16(uint16_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:443:6:void version_to_str(char*, uint32_t)	1
+D:/mLRS/mLRS/Common/common_types.cpp:470:6:void strbufstrcpy(char*, const char*, uint16_t)	3
+D:/mLRS/mLRS/Common/common_types.cpp:480:6:void strstrbufcpy(char*, const char*, uint16_t)	3
+D:/mLRS/mLRS/Common/common_types.cpp:490:6:bool strbufeq(char*, const char*, uint16_t)	5

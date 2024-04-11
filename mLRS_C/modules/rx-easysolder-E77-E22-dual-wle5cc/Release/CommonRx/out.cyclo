@@ -1,0 +1,17 @@
+D:/mLRS/mLRS/CommonRx/out.h:71:18:virtual void OutBase::putc(char)	1
+D:/mLRS/mLRS/CommonRx/out.h:72:18:virtual bool OutBase::config_sbus(bool)	1
+D:/mLRS/mLRS/CommonRx/out.h:73:18:virtual bool OutBase::config_crsf(bool)	1
+D:/mLRS/mLRS/CommonRx/out.h:74:18:virtual bool OutBase::config_sbus_inverted(bool)	1
+D:/mLRS/mLRS/CommonRx/out.cpp:20:1:OutBase::OutBase()	1
+D:/mLRS/mLRS/CommonRx/out.cpp:26:6:void OutBase::Init(tRxSetup*)	1
+D:/mLRS/mLRS/CommonRx/out.cpp:41:6:void OutBase::Configure(uint8_t)	8
+D:/mLRS/mLRS/CommonRx/out.cpp:92:6:void OutBase::SetChannelOrder(uint8_t)	1
+D:/mLRS/mLRS/CommonRx/out.cpp:172:6:void OutBase::SendLinkStatistics(tOutLinkStats*)	3
+D:/mLRS/mLRS/CommonRx/out.cpp:188:6:void OutBase::SendLinkStatisticsDisconnected()	2
+D:/mLRS/mLRS/CommonRx/out.cpp:215:6:void OutBase::putbuf(uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonRx/out.cpp:225:6:void OutBase::send_sbus_rcdata(tRcData*, bool, bool)	4
+D:/mLRS/mLRS/CommonRx/out.cpp:264:6:void OutBase::send_crsf_rcdata(tRcData*)	1
+D:/mLRS/mLRS/CommonRx/out.cpp:98:6:void OutBase::SendRcData(tRcData*, bool, bool, int8_t, uint8_t)	17
+D:/mLRS/mLRS/CommonRx/out.cpp:301:6:void OutBase::send_crsf_linkstatistics(tOutLinkStats*)	3
+D:/mLRS/mLRS/CommonRx/out.cpp:339:6:void OutBase::do_crsf()	4
+D:/mLRS/mLRS/CommonRx/out.cpp:76:6:void OutBase::Do()	3

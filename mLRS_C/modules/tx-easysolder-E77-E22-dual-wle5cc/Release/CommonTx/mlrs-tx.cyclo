@@ -1,0 +1,472 @@
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:64:18:virtual void tSerialBase::InitOnce()	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:65:18:virtual void tSerialBase::Init()	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:66:18:virtual void tSerialBase::SetBaudRate(uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:67:18:virtual void tSerialBase::putc(char)	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:68:18:virtual bool tSerialBase::available()	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:69:18:virtual char tSerialBase::getc()	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:70:18:virtual void tSerialBase::flush()	1
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:71:22:virtual uint16_t tSerialBase::bytes_available()	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:287:22:void LL_AHB1_GRP1_EnableClock(uint32_t)	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:449:22:void LL_AHB2_GRP1_EnableClock(uint32_t)	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:914:22:void LL_APB1_GRP1_EnableClock(uint32_t)	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:935:22:void LL_APB1_GRP2_EnableClock(uint32_t)	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_bus.h:1303:22:void LL_APB2_GRP1_EnableClock(uint32_t)	1
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_usart.h:3493:22:void LL_USART_EnableIT_TXE_TXFNF(USART_TypeDef*)	2
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_usart.h:3683:22:void LL_USART_DisableIT_RXNE_RXFNE(USART_TypeDef*)	2
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_usart.h:3694:22:void LL_USART_DisableIT_TC(USART_TypeDef*)	2
+../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_usart.h:3710:22:void LL_USART_DisableIT_TXE_TXFNF(USART_TypeDef*)	2
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/../../modules/sx12xx-lib/src/sx126x.h:54:18:virtual void Sx126xDriverBase::SetDelay(uint16_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../lib/fastmavlink_crc.h:84:37:void fmav_crc_accumulate(uint16_t*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../lib/fastmavlink_crc.h:92:37:void fmav_crc_accumulate_buf(uint16_t*, const uint8_t*, uint16_t)	3
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../lib/fastmavlink_crc.h:125:41:uint16_t fmav_crc_calculate(const uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../lib/fastmavlink_functions.h:501:40:uint8_t fmav_parse_and_check_to_frame_buf(fmav_result_t*, uint8_t*, fmav_status_t*, uint8_t)	23
+D:/mLRS/mLRS/CommonTx/../Common/lq_counter.h:40:10:virtual void StatsLQ::Update1Hz()	1
+D:/mLRS/mLRS/CommonTx/../Common/lq_counter.h:66:10:virtual void StatsBytes::Update1Hz()	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:85:10:virtual bool tSerialPort::available()	2
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:85:6:void uart_rx_putc_torxbuf(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:84:10:virtual void tMBridge::flush()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:176:6:virtual void tTxCrsf::parse_nextchar(uint8_t)	14
+D:/mLRS/mLRS/CommonTx/in_interface.h:120:10:virtual bool tIn::available()	1
+D:/mLRS/mLRS/CommonTx/../Common/while.h:26:18:virtual void WhileBase::handle()	1
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:603:20:bool connected_and_rx_setup_available()	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:82:10:virtual bool tMBridge::available()	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:83:10:virtual char tMBridge::getc()	2
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:168:37:void fmavX_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../all/../ardupilotmega/../common/./mavlink_msg_battery_status.h:236:37:void fmav_msg_battery_status_decode(fmav_battery_status_t*, const fmav_message_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../all/../ardupilotmega/../common/./mavlink_msg_attitude.h:201:37:void fmav_msg_attitude_decode(fmav_attitude_t*, const fmav_message_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../all/../ardupilotmega/./mavlink_msg_rangefinder.h:176:37:void fmav_msg_rangefinder_decode(fmav_rangefinder_t*, const fmav_message_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../lib/fastmavlink_functions.h:455:37:void fmav_frame_buf_to_msg(fmav_message_t*, fmav_result_t*, uint8_t*)	5
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../lib/fastmavlink_functions.h:719:41:uint16_t fmav_msg_to_frame_buf(uint8_t*, fmav_message_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/mlrs_all/../all/../ardupilotmega/../common/../standard/../minimal/./mavlink_msg_heartbeat.h:196:37:void fmav_msg_heartbeat_decode(fmav_heartbeat_t*, const fmav_message_t*)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:798:6:void uartb_rx_enableisr(FunctionalState)	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:207:6:void sxReadFrame(uint8_t, void*, void*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-delay.h:37:20:void delay_ns(uint32_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:236:6:void rcc_init_spi(SPI_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../Common/libs/fifo.h:31:10:bool FifoBase<T, FIFO_SIZE>::Put(T) [with T = unsigned char; short unsigned int FIFO_SIZE = 128]	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:80:10:virtual void tMBridge::putc(char)	2
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/lib/fastmavlink_router.h:165:40:uint8_t fmav_router_find_or_add_component(uint8_t, uint8_t, uint8_t)	7
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/out/lib/fastmavlink_router.h:264:37:void fmav_router_handle_message(uint8_t, fmav_result_t*)	14
+D:/mLRS/mLRS/CommonTx/cli.h:317:10:void tTxCli::putc(char)	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:84:10:virtual void tMBridge::_ZThn20_N8tMBridge5flushEv()	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:57:6:void uart_rx_callback_dummy(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:58:6:void uart_tc_callback_dummy()	1
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:394:10:virtual void Sx126xDriver::SpiSelect()	1
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:400:10:virtual void Sx126xDriver::SpiDeselect()	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:87:10:virtual void tSerialPort::flush()	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:131:10:virtual void tComPort::flush()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:798:6:void uart_rx_enableisr(FunctionalState)	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:129:10:virtual bool tComPort::available()	2
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:73:10:void tSerialBase::putbuf(void*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/common_types.h:74:10:void tSerialBase::puts(const char*)	2
+D:/mLRS/mLRS/CommonTx/cli.h:318:10:void tTxCli::puts(const char*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:33:6:void rcc_init_afio()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:41:6:void rcc_init_gpio(GPIO_TypeDef*)	5
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:127:6:void rcc_init_tim(TIM_TypeDef*)	5
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:183:6:void rcc_init_lptim(LPTIM_TypeDef*)	4
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:199:6:void rcc_init_uart(USART_TypeDef*)	4
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:236:6:void rcc_init_spi(SPI_TypeDef*)	4
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:258:6:void rcc_init_adc(ADC_TypeDef*)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:329:6:void rcc_init_dma(DMA_TypeDef*)	3
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:489:15:GPIO_TypeDef* IO_GPIOx(GPIO_TypeDef*, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:490:10:uint32_t IO_PINx(GPIO_TypeDef*, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:493:6:void _gpio_init(GPIO_TypeDef*, uint32_t, IOMODEENUM, IOSPEEDENUM, IOAFENUM, uint8_t)	31
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:586:20:void gpio_init(GPIO_TypeDef*, uint32_t, IOMODEENUM, IOSPEEDENUM)	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:255:6:void tPin5BridgeBase::pin5_tx_enable(bool)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:728:10:uint16_t _tim_devider(TIM_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:768:6:void tim_config_up(TIM_TypeDef*, uint32_t, TIMERBASEENUM)	6
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:826:6:void tim_config_1us(TIM_TypeDef*, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:832:6:void tim_config_1us_freerunning(TIM_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:838:6:void tim_enable(TIM_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:844:6:void tim_init_up(TIM_TypeDef*, uint32_t, TIMERBASEENUM)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:852:6:void tim_init_1us(TIM_TypeDef*, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-peripherals.h:858:6:void tim_init_1us_freerunning(TIM_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-mcu.h:41:6:void BootLoaderInit()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-adc.h:73:6:void _adc_ADC_SelfCalibrate(ADC_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-adc.h:81:6:void adc_init_one_channel(ADC_TypeDef*)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-adc.h:221:6:void adc_config_channel(ADC_TypeDef*, uint32_t, uint32_t, GPIO_TypeDef*, uint32_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-adc.h:256:6:void adc_init_begin(ADC_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-adc.h:278:6:void adc_enable(ADC_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-adc.h:316:6:void adc_start_conversion(ADC_TypeDef*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-stack.h:28:10:uint32_t stack_check_used()	3
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-stack.h:41:6:void stack_check_init()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-subghz.h:43:9:uint8_t subghz_is_busy()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-subghz.h:50:6:void subghz_waitonbusy()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-subghz.h:65:6:void subghz_init()	4
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:125:6:void sx_init_gpio()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:131:6:bool sx_busy_read()	1
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:389:10:virtual void Sx126xDriver::WaitOnBusy()	2
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:136:6:void sx_amp_transmit()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:142:6:void sx_amp_receive()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:148:6:void sx_dio_init_exti_isroff()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:158:6:void sx_dio_enable_exti_isr()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:167:6:void sx_dio_exti_isr_clearflag()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:196:6:void sx2_init_gpio()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:205:6:bool sx2_busy_read()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:210:6:void sx2_amp_transmit()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:216:6:void sx2_amp_receive()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:222:6:void sx2_dio_init_exti_isroff()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:236:6:void sx2_dio_enable_exti_isr()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:242:6:void sx2_dio_exti_isr_clearflag()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:281:6:void button_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:286:6:bool button_pressed()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:297:6:void leds_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:303:6:void led_green_off()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:304:6:void led_green_on()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:305:6:void led_green_toggle()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:307:6:void led_red_off()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:308:6:void led_red_on()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:309:6:void led_red_toggle()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:318:6:void ser_or_com_init()	3
+D:/mLRS/mLRS/CommonTx/../Common/hal/tx-hal-easysolder-e77-e22-wle5cc.h:328:6:bool ser_or_com_serial()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/hal.h:401:10:void systembootloader_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/hal.h:405:10:void esp_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/hal/hal.h:409:10:void fiveway_init()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-delay.h:21:6:void delay_init()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-delay.h:47:6:void delay_us(uint32_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-delay.h:55:6:void delay_ms(uint16_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:149:19:FLASH_STATUS_ENUM FLASH_ErasePage(uint32_t, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:220:19:FLASH_STATUS_ENUM FLASH_ProgramWord(uint32_t, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:232:19:FLASH_STATUS_ENUM FLASH_ProgramDoubleWord(uint32_t, uint64_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:246:6:void ee_hal_unlock()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:252:6:void ee_hal_lock()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:258:10:uint16_t ee_hal_erasepage(uint32_t, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:264:10:uint16_t ee_hal_programword(uint32_t, uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:270:10:uint16_t ee_hal_programdoubleword(uint32_t, uint64_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:283:16:EE_STATUS_ENUM _ee_write_to(uint16_t, void*, uint16_t)	7
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:397:16:EE_STATUS_ENUM ee_format()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:416:16:EE_STATUS_ENUM ee_readdata(void*, uint16_t)	3
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:440:16:EE_STATUS_ENUM ee_writedata(void*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:460:16:EE_STATUS_ENUM ee_init()	5
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-eeprom.h:497:10:uint32_t ee_getpagebaseaddress()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:199:6:void spi_disable()	4
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:251:9:uint8_t spi_transmitchar(uint8_t)	3
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:406:10:virtual void Sx126xDriver::SpiTransferByte(uint8_t*, uint8_t*)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:263:6:void spi_transfer(uint8_t*, uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:316:6:void spi_read(uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:327:6:void spi_write(uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:338:6:void spi_writecandread(uint8_t, uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-spi.h:505:6:void spi_init()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:540:6:void USART1_IRQHandler()	7
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:621:10:uint16_t uartb_putc(char)	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:128:10:virtual void tComPort::putc(char)	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:84:10:virtual void tSerialPort::putc(char)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:640:6:void uartb_puts(const char*)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:649:6:void uartb_putbuf(uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:658:10:uint16_t uartb_tx_notfull()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:695:10:uint16_t uartb_rx_bytesavailable()	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:88:14:virtual uint16_t tSerialPort::bytes_available()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:704:6:char uartb_getc()	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:86:10:virtual char tSerialPort::getc()	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:130:10:virtual char tComPort::getc()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:733:6:void _uartb_initprotocol(uint32_t, UARTPARITYENUM, UARTSTOPBITENUM)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:766:6:void uartb_setprotocol(uint32_t, UARTPARITYENUM, UARTSTOPBITENUM)	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:83:10:virtual void tSerialPort::SetBaudRate(uint32_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:780:6:void uartb_setbaudrate(uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:786:6:void uartb_tx_enablepin(FunctionalState)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:798:6:void uartb_rx_enableisr(FunctionalState)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:818:6:void uartb_init_isroff()	3
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uartb.h:956:6:void uartb_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:82:10:virtual void tSerialPort::Init()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:162:6:void _swuart_tx_start()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:181:6:void TIM17_IRQHandler()	8
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:232:10:uint16_t swuart_putc(char)	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:101:10:virtual void tDebugPort::putc(char)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:245:6:void swuart_puts(const char*)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:254:6:void swuart_putbuf(uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:262:10:uint16_t swuart_tx_notfull()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:296:6:void swuart_setprotocol(uint32_t, UARTPARITYENUM, UARTSTOPBITENUM)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:306:6:void swuart_setbaudrate(uint32_t)	4
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:330:6:void swuart_tx_enablepin(FunctionalState)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:338:6:void swuart_rx_enableisr(FunctionalState)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:346:6:void swuart_init_isroff()	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:100:10:virtual void tDebugPort::Init()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart-sw.h:427:6:void swuart_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:27:6:void setup_configure_metadata()	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:181:6:void inc_bindphrase_char(char*, uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:190:6:void setup_default_bindphrase(char*, uint8_t, const char*)	3
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:216:6:void setup_default(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:254:6:void setup_sanitize_config(uint8_t)	94
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:412:6:void configure_mode(uint8_t)	5
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:488:6:void setup_configure_config(uint8_t)	28
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:738:6:void setup_clear()	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:744:16:EE_STATUS_ENUM setup_store_to_EEPROM()	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:750:16:EE_STATUS_ENUM setup_retrieve_from_EEPROM()	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:756:6:void setup_reload()	1
+D:/mLRS/mLRS/CommonTx/../Common/setup.h:772:6:void setup_init()	24
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:98:6:void sx126x_rfpower_calc(int8_t, uint8_t*, int8_t*, uint8_t, uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:413:10:virtual void Sx126xDriver::RfPowerCalc(int8_t, uint8_t*, int8_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:148:10:void Sx126xDriverCommon::SetLoraConfigurationByIndex(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:188:10:void Sx126xDriverCommon::SetRfPower_dbm(int8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:194:10:void Sx126xDriverCommon::Configure(tSxGlobalConfig*)	9
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:287:10:void Sx126xDriverCommon::SetToIdle()	1
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:317:10:void Sx126xDriverCommon::config_calc()	3
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:145:13:virtual int32_t WhileTransmit::dtmax_us()	4
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:339:13:int16_t Sx126xDriverCommon::ReceiverSensitivity_dbm()	4
+D:/mLRS/mLRS/CommonTx/../Common/sx-drivers/sx126x_driver.h:346:12:int8_t Sx126xDriverCommon::RfPower_dbm()	3
+D:/mLRS/mLRS/CommonTx/../Common/lq_counter.h:92:10:void LqCounterBase::Init(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/lq_counter.h:116:10:void LqCounterBase::Next()	4
+D:/mLRS/mLRS/CommonTx/../Common/fhss.h:546:14:uint32_t tFhssBase::GetCurrFreq()	2
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:34:6:void _pack_txframe_w_type(tTxFrame*, uint8_t, tFrameStats*, tRcData*, uint8_t*, uint8_t)	6
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:91:6:void pack_txframe(tTxFrame*, tFrameStats*, tRcData*, uint8_t*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:98:9:uint8_t check_txframe(tTxFrame*)	6
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:121:6:void rcdata_rc1_from_txframe(tRcData*, tTxFrame*)	3
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:133:6:void rcdata_from_txframe(tRcData*, tTxFrame*)	5
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:160:6:void _pack_rxframe_w_type(tRxFrame*, uint8_t, tFrameStats*, uint8_t*, uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:189:6:void pack_rxframe(tRxFrame*, tFrameStats*, uint8_t*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:195:9:uint8_t check_rxframe(tRxFrame*)	5
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:220:6:void cmdframerxparameters_rxparams_from_rxsetup(tCmdFrameRxParameters*)	2
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:246:6:void cmdframerxparameters_rxparams_to_rxsetup(tCmdFrameRxParameters*)	2
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:275:6:void pack_txcmdframe_cmd(tTxFrame*, tFrameStats*, tRcData*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:286:6:void unpack_rxcmdframe_rxsetupdata(tRxFrame*)	2
+D:/mLRS/mLRS/CommonTx/../Common/frames.h:317:6:void pack_txcmdframe_setrxparams(tTxFrame*, tFrameStats*, tRcData*)	1
+D:/mLRS/mLRS/CommonTx/../Common/common_stats.h:98:10:void Stats::Update1Hz()	1
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:82:6:void BindBase::Init()	1
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:101:6:void BindBase::ConfigForBind()	1
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:118:6:void BindBase::Do()	12
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:160:9:uint8_t BindBase::Task()	3
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:176:6:void BindBase::AutoBind()	1
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:196:6:void BindBase::handle_receive(uint8_t, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/fail.h:37:6:void fail_do_dbg(tSerialBase*, const char*)	2
+D:/mLRS/mLRS/CommonTx/../Common/fail.h:48:6:void fail(tSerialBase*, uint8_t, const char*)	12
+D:/mLRS/mLRS/CommonTx/../Common/common.h:35:6:void HAL_IncTick()	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:42:19:volatile uint32_t millis32()	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:207:6:void sxReadFrame(uint8_t, void*, void*, uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/common.h:217:6:void sxSendFrame(uint8_t, void*, uint8_t, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:204:6:void BindBase::do_transmit(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/common.h:234:6:void sxGetPacketStatus(uint8_t, Stats*)	5
+D:/mLRS/mLRS/CommonTx/../Common/bind.h:221:9:uint8_t BindBase::do_receive(uint8_t, bool)	3
+D:/mLRS/mLRS/CommonTx/../Common/common.h:263:6:void FAILALWAYS(uint8_t, const char*)	0
+D:/mLRS/mLRS/CommonTx/../Common/common.h:269:6:void FAILALWAYS_WSTATE(uint8_t, const char*, uint16_t, uint8_t, uint8_t, uint8_t)	0
+D:/mLRS/mLRS/CommonTx/../Common/common.h:286:6:void FAIL(uint8_t, const char*)	0
+D:/mLRS/mLRS/CommonTx/../Common/common.h:294:6:void FAIL(const char*)	0
+D:/mLRS/mLRS/CommonTx/../Common/common.h:302:6:void FAIL_WSTATE(uint8_t, const char*, uint16_t, uint8_t, uint8_t, uint8_t)	0
+D:/mLRS/mLRS/CommonTx/../Common/micros.h:25:6:void micros_init()	1
+D:/mLRS/mLRS/CommonTx/../Common/micros.h:31:10:uint16_t micros()	1
+D:/mLRS/mLRS/CommonTx/txstats.h:43:6:void tTxStats::Init(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/txstats.h:56:6:void tTxStats::Update1Hz()	1
+D:/mLRS/mLRS/CommonTx/txstats.h:62:6:void tTxStats::Next()	1
+D:/mLRS/mLRS/CommonTx/txstats.h:69:6:void tTxStats::Clear()	1
+D:/mLRS/mLRS/CommonTx/txstats.h:78:6:void tTxStats::doFrameReceived()	1
+D:/mLRS/mLRS/CommonTx/txstats.h:85:6:void tTxStats::doValidFrameReceived()	1
+D:/mLRS/mLRS/CommonTx/txstats.h:92:9:uint8_t tTxStats::GetLQ_serial()	2
+D:/mLRS/mLRS/CommonTx/setup_tx.h:112:6:bool setup_param_is_tx(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/setup_tx.h:118:6:bool setup_param_is_rx(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/setup_tx.h:124:6:bool setup_param_is_for_rx(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/setup_tx.h:131:7:void* SetupParameterPtr(uint8_t)	3
+D:/mLRS/mLRS/CommonTx/setup_tx.h:153:6:bool setup_set_param(uint8_t, tParamValue)	12
+D:/mLRS/mLRS/CommonTx/setup_tx.h:194:6:bool setup_set_param_str6(uint8_t, char*)	4
+D:/mLRS/mLRS/CommonTx/cli.h:38:6:bool _param_get_listval_fromoptstr(char*, uint8_t, uint8_t, uint8_t)	10
+D:/mLRS/mLRS/CommonTx/cli.h:87:10:uint16_t param_get_allowed_mask(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/cli.h:94:9:uint8_t param_get_opt_num(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/cli.h:107:9:uint8_t param_get_allowed_opt_num(uint8_t)	4
+D:/mLRS/mLRS/CommonTx/cli.h:122:6:bool param_get_idx(uint8_t*, char*)	4
+D:/mLRS/mLRS/CommonTx/cli.h:144:6:bool param_get_val_formattedstr(char*, uint8_t, uint8_t)	5
+D:/mLRS/mLRS/CommonTx/cli.h:176:6:bool param_set_val_fromint(bool*, int32_t, uint8_t)	8
+D:/mLRS/mLRS/CommonTx/cli.h:220:6:bool param_set_str6val(bool*, char*, uint8_t)	5
+D:/mLRS/mLRS/CommonTx/cli.h:249:6:bool param_set_val_fromstr(bool*, char*, uint8_t)	4
+D:/mLRS/mLRS/CommonTx/cli.h:319:10:void tTxCli::putsn(const char*)	1
+D:/mLRS/mLRS/CommonTx/cli.h:341:6:void tTxCli::Init(tSerialBase*)	1
+D:/mLRS/mLRS/CommonTx/cli.h:360:6:void tTxCli::Set(uint8_t)	5
+D:/mLRS/mLRS/CommonTx/cli.h:374:9:uint8_t tTxCli::Task()	1
+D:/mLRS/mLRS/CommonTx/cli.h:382:6:void tTxCli::addc(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/cli.h:392:6:void tTxCli::clear()	1
+D:/mLRS/mLRS/CommonTx/cli.h:400:6:bool tTxCli::is_cmd(const char*)	1
+D:/mLRS/mLRS/CommonTx/cli.h:407:6:bool tTxCli::is_cmd_set_value(const char*, int32_t*)	8
+D:/mLRS/mLRS/CommonTx/cli.h:434:6:void tTxCli::print_config_id()	1
+D:/mLRS/mLRS/CommonTx/cli.h:443:6:bool tTxCli::is_cmd_param_set(char*, char*)	11
+D:/mLRS/mLRS/CommonTx/cli.h:479:6:void tTxCli::print_param_opt_list(uint8_t)	6
+D:/mLRS/mLRS/CommonTx/cli.h:515:6:void tTxCli::print_param(uint8_t)	11
+D:/mLRS/mLRS/CommonTx/cli.h:558:6:void tTxCli::print_param_list(uint8_t)	15
+D:/mLRS/mLRS/CommonTx/cli.h:577:6:void tTxCli::stream()	3
+D:/mLRS/mLRS/CommonTx/cli.h:608:6:void tTxCli::print_device_version()	3
+D:/mLRS/mLRS/CommonTx/cli.h:638:6:void tTxCli::print_frequencies()	2
+D:/mLRS/mLRS/CommonTx/cli.h:662:6:void tTxCli::print_help()	1
+D:/mLRS/mLRS/CommonTx/cli.h:692:6:void tTxCli::Do()	37
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:152:6:virtual void WhileTransmit::handle_once()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:540:6:void USART2_IRQHandler()	9
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:621:10:uint16_t uart_putc(char)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:640:6:void uart_puts(const char*)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:649:6:void uart_putbuf(uint8_t*, uint16_t)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:658:10:uint16_t uart_tx_notfull()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:695:10:uint16_t uart_rx_bytesavailable()	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:704:6:char uart_getc()	2
+D:/mLRS/mLRS/CommonTx/in_interface.h:121:10:virtual char tIn::getc()	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:733:6:void _uart_initprotocol(uint32_t, UARTPARITYENUM, UARTSTOPBITENUM)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:766:6:void uart_setprotocol(uint32_t, UARTPARITYENUM, UARTSTOPBITENUM)	1
+D:/mLRS/mLRS/CommonTx/in_interface.h:98:10:virtual bool tIn::config_sbus(bool)	2
+D:/mLRS/mLRS/CommonTx/in_interface.h:109:10:virtual bool tIn::config_sbus_inverted(bool)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:780:6:void uart_setbaudrate(uint32_t)	1
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:786:6:void uart_tx_enablepin(FunctionalState)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:798:6:void uart_rx_enableisr(FunctionalState)	2
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:818:6:void uart_init_isroff()	3
+D:/mLRS/mLRS/CommonTx/../modules/stm32ll-lib/src/stdstm32-uart.h:956:6:void uart_init()	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:69:6:void uart_tx_putc_totxbuf(char)	2
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:147:6:virtual bool tTxCrsf::transmit_start()	3
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:79:6:void uart_tx_start()	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:245:6:void tPin5BridgeBase::TelemetryStart()	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:255:6:void tPin5BridgeBase::pin5_tx_enable(bool)	2
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:155:6:void tPin5BridgeBase::Init()	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:315:6:void tPin5BridgeBase::uart_rx_callback(uint8_t)	4
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:109:6:void mbridge_uart_rx_callback(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:142:6:void crsf_uart_rx_callback(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:336:6:void tPin5BridgeBase::uart_tc_callback()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:110:6:void mbridge_uart_tc_callback()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:143:6:void crsf_uart_tc_callback()	1
+D:/mLRS/mLRS/CommonTx/jr_pin5_interface.h:351:6:void tPin5BridgeBase::CheckAndRescue()	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/mbridge_protocol.h:90:9:uint8_t mbridge_cmd_payload_len(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:164:6:virtual void tMBridge::parse_nextchar(uint8_t)	22
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:151:6:void tMBridge::send_command()	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:242:6:void tMBridge::fill_rcdata(tRcData*)	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:268:6:void tMBridge::ParseCrsfFrame(uint8_t*, uint8_t)	3
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:288:6:bool tMBridge::CrsfFrameAvailable(uint8_t**, uint8_t*)	3
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:306:6:void tMBridge::Init(bool, bool)	4
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:336:6:bool tMBridge::ChannelsUpdated(tRcData*)	4
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:353:6:bool tMBridge::TelemetryUpdate(uint8_t*)	8
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:387:6:bool tMBridge::CommandReceived(uint8_t*)	3
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:400:10:uint8_t* tMBridge::GetPayloadPtr()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:406:9:uint8_t tMBridge::GetModelId()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:421:6:void tMBridge::SendCommand(uint8_t, uint8_t*)	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:434:6:bool tMBridge::CommandInFifo(uint8_t*)	5
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:448:6:void tMBridge::Lock(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:454:6:void tMBridge::Unlock()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:568:6:void mbridge_send_Info()	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:596:6:void mbridge_send_DeviceItemTx()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:607:6:void mbridge_send_DeviceItemRx()	2
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:634:6:void mbridge_start_ParamRequestByIndex(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:644:6:void mbridge_start_ParamRequestList()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:467:9:uint8_t tMBridge::HandleRequestCmd(uint8_t*)	7
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:506:9:uint8_t tMBridge::HandleCmd(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:654:6:void mbridge_send_ParamItem()	24
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:794:6:bool mbridge_do_ParamSet(uint8_t*, bool*)	3
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:816:6:void mbridge_send_cmd(uint8_t)	5
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:221:6:void tPassThrough::Init()	1
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:243:6:void tPassThrough::decode_passthrough_array(uint8_t, uint8_t*)	18
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:287:6:void tPassThrough::handle_mavlink_msg_passthrough_array_tunnel(fmav_tunnel_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:295:6:void tPassThrough::handle_mavlink_msg_passthrough_array(fmav_frsky_passthrough_array_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:302:6:void tPassThrough::handle_mavlink_msg_heartbeat(fmav_heartbeat_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:312:6:void tPassThrough::handle_mavlink_msg_sys_status(fmav_sys_status_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:320:6:void tPassThrough::handle_mavlink_msg_gps_raw_int(fmav_gps_raw_int_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:330:6:void tPassThrough::handle_mavlink_msg_raw_imu(fmav_raw_imu_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:338:6:void tPassThrough::handle_mavlink_msg_attitude(fmav_attitude_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:345:6:void tPassThrough::handle_mavlink_msg_global_position_int(fmav_global_position_int_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:362:6:void tPassThrough::handle_mavlink_msg_mission_current(fmav_mission_current_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:370:6:void tPassThrough::handle_mavlink_msg_nav_controller_output(fmav_nav_controller_output_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:378:6:void tPassThrough::handle_mavlink_msg_vfr_hud(fmav_vfr_hud_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:393:6:void tPassThrough::handle_mavlink_msg_terrain_report(fmav_terrain_report_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:400:6:void tPassThrough::handle_mavlink_msg_battery_status(fmav_battery_status_t*)	5
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:413:6:void tPassThrough::handle_mavlink_msg_fence_status(fmav_fence_status_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:422:6:void tPassThrough::handle_mavlink_msg_rangefinder(fmav_rangefinder_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:429:6:void tPassThrough::handle_mavlink_msg_rpm(fmav_rpm_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:436:6:void tPassThrough::handle_mavlink_msg_home_position(fmav_home_position_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:444:6:void tPassThrough::handle_mavlink_msg_statustext(fmav_statustext_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:454:6:void pt_pack32(uint32_t*, uint32_t, uint8_t, uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:463:6:bool tPassThrough::get_GpsLat_0x800(uint32_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:485:6:bool tPassThrough::get_GpsLon_0x800(uint32_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:508:6:bool tPassThrough::get_Text_0x5000(uint32_t*)	9
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:554:6:bool tPassThrough::get_ApStatus_0x5001(uint32_t*)	8
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:609:6:bool tPassThrough::get_GpsStatus_0x5002(uint32_t*)	9
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:685:6:bool tPassThrough::get_Home_0x5004(uint32_t*)	7
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:746:6:bool tPassThrough::get_VelocityYaw_0x5005(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:766:6:bool tPassThrough::get_VelocityYaw_0x5005_Air(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:787:6:bool tPassThrough::get_AttitudeRange_0x5006(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:808:6:bool tPassThrough::get_Param_0x5007(uint32_t*)	5
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:861:6:bool tPassThrough::get_Rpm_0x500A(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:874:6:bool tPassThrough::get_Terrain_0x500B(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:887:6:bool tPassThrough::get_Wind_0x500C(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:900:6:bool tPassThrough::get_WayPointV2_0x500D(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:913:6:bool tPassThrough::get_VfrHud_0x50F2(uint32_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/ardupilot_protocol.h:113:6:void ap_copter_flight_mode_name4(char*, uint8_t)	27
+D:/mLRS/mLRS/CommonTx/../Common/protocols/ardupilot_protocol.h:149:6:void ap_plane_flight_mode_name4(char*, uint8_t)	26
+D:/mLRS/mLRS/CommonTx/../Common/protocols/ardupilot_protocol.h:184:6:void ap_rover_flight_mode_name4(char*, uint8_t)	14
+D:/mLRS/mLRS/CommonTx/../Common/protocols/ardupilot_protocol.h:207:6:void ap_sub_flight_mode_name4(char*, uint8_t)	11
+D:/mLRS/mLRS/CommonTx/../Common/protocols/ardupilot_protocol.h:240:9:uint8_t ap_vehicle_from_mavtype(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/ardupilot_protocol.h:272:6:void ap_flight_mode_name4(char*, uint8_t, uint8_t)	5
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:93:7:tPassThrough::tPassThrough()	2
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:240:6:void tTxCrsf::fill_rcdata(tRcData*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:264:9:uint8_t tTxCrsf::crc8(const uint8_t*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:273:6:void tTxCrsf::Init(bool)	2
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:312:6:bool tTxCrsf::ChannelsUpdated(tRcData*)	4
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:331:6:bool tTxCrsf::TelemetryUpdate(uint8_t*, uint16_t)	9
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:377:6:bool tTxCrsf::CommandReceived(uint8_t*)	6
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:405:10:uint8_t* tTxCrsf::GetCmdDataPtr()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:411:10:uint8_t* tTxCrsf::GetPayloadPtr()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:417:9:uint8_t tTxCrsf::GetPayloadLen()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:423:9:uint8_t tTxCrsf::GetCmdModelId()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:432:6:void tTxCrsf::SendFrame(uint8_t, void*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:444:6:void tTxCrsf::SendLinkStatistics(tCrsfLinkStatistics*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:450:6:void tTxCrsf::SendLinkStatisticsTx(tCrsfLinkStatisticsTx*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:456:6:void tTxCrsf::SendLinkStatisticsRx(tCrsfLinkStatisticsRx*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:462:6:void tTxCrsf::SendMBridgeFrame(void*, uint8_t)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:481:6:void tTxCrsf::handle_mavlink_msg_heartbeat(fmav_heartbeat_t*)	4
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:498:9:int32_t mav_battery_voltage(fmav_battery_status_t*)	3
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:661:6:bool tPassThrough::get_Battery1_0x5003(uint32_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:837:6:bool tPassThrough::get_Battery2_0x5008(uint32_t*)	4
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:936:6:bool tPassThrough::get_packet_data(uint8_t, uint32_t*)	15
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:964:6:bool tPassThrough::GetTelemetryFrameSingle(uint8_t, uint8_t*, uint8_t*)	2
+D:/mLRS/mLRS/CommonTx/../Common/protocols/passthrough_protocol.h:985:6:bool tPassThrough::GetTelemetryFrameMulti(uint8_t*, uint8_t*)	19
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:515:6:void tTxCrsf::handle_mavlink_msg_battery_status(fmav_battery_status_t*)	4
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:531:6:void tTxCrsf::handle_mavlink_msg_attitude(fmav_attitude_t*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:540:6:void tTxCrsf::handle_mavlink_msg_gps_raw_int(fmav_gps_raw_int_t*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:546:6:void tTxCrsf::handle_mavlink_msg_gps2_raw(fmav_gps2_raw_t*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:552:6:void tTxCrsf::handle_mavlink_msg_global_position_int(fmav_global_position_int_t*)	3
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:584:6:void tTxCrsf::handle_mavlink_msg_vfr_hud(fmav_vfr_hud_t*)	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:594:6:0(fmav_message_t*)	62
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:594:6:void tTxCrsf::TelemetryHandleMavlinkMsg(fmav_message_t*)	3
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:764:6:void tTxCrsf::SendTelemetryFrame()	20
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:831:9:uint8_t crsf_cvt_rssi_percent(int8_t)	4
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:858:6:void crsf_send_LinkStatistics()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:877:6:void crsf_send_LinkStatisticsTx()	1
+D:/mLRS/mLRS/CommonTx/crsf_interface_tx.h:891:6:void crsf_send_LinkStatisticsRx()	1
+D:/mLRS/mLRS/CommonTx/../Common/mavlink/fmav_extension.h:18:6:void fmav_msg_recalculate_crc(fmav_message_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:132:6:void fmavX_status_reset(fmavx_status_t*)	1
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:147:6:void fmavX_config_compression(uint8_t)	1
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:767:6:void _fmavX_encode_put_bits(uint8_t*, uint8_t*, uint16_t, uint8_t)	5
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:786:6:void _fmavX_encode_rle(uint8_t*, uint8_t*, uint8_t, uint8_t)	78
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:817:9:uint8_t _fmavX_payload_compress(uint8_t*, uint8_t*, uint8_t*, uint8_t)	55
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:311:41:uint16_t fmavX_msg_to_frame_buf(uint8_t*, fmav_message_t*)	20
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:904:9:uint8_t _fmavX_decode_get_bits(uint8_t*, uint8_t, uint8_t)	6
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:925:6:void _fmavX_payload_decompress(uint8_t*, uint8_t*, uint8_t)	152
+D:/mLRS/mLRS/CommonTx/../Common/thirdparty/mavlinkx.h:699:40:uint8_t fmavX_parse_and_check_to_frame_buf(fmav_result_t*, uint8_t*, fmav_status_t*, uint8_t)	113
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:86:6:void tTxMavlink::Init(tSerialBase*, tSerialBase*, tSerialBase*)	6
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:136:9:uint8_t tTxMavlink::VehicleState()	2
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:144:6:void tTxMavlink::FrameLost()	1
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:291:6:void tTxMavlink::send_msg_fifo_link_out(fmav_result_t*, uint8_t*)	4
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:310:6:void tTxMavlink::send_msg_serial_out()	2
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:337:9:uint8_t tTxMavlink::getc()	3
+D:/mLRS/mLRS/CommonTx/sx_serial_interface_tx.h:68:6:virtual char tTxSxSerial::getc()	3
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:349:6:void tTxMavlink::flush()	3
+D:/mLRS/mLRS/CommonTx/sx_serial_interface_tx.h:91:6:virtual void tTxSxSerial::flush()	1
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:365:6:void tTxMavlink::handle_msg_serial_out(fmav_message_t*)	8
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:245:6:void tTxMavlink::putc(char)	6
+D:/mLRS/mLRS/CommonTx/sx_serial_interface_tx.h:79:6:virtual void tTxSxSerial::putc(char)	3
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:402:6:void tTxMavlink::generate_radio_status()	4
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:104:9:uint8_t mavlink_vehicle_state()	1
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:516:6:void mbridge_send_LinkStats()	3
+D:/mLRS/mLRS/CommonTx/sx_serial_interface_tx.h:30:6:void tTxSxSerial::Init(tSerialBase*, tSerialBase*, tSerialBase*)	5
+D:/mLRS/mLRS/CommonTx/sx_serial_interface_tx.h:51:6:bool tTxSxSerial::IsEnabled()	1
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:181:6:void start_bind()	2
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:187:6:void stop_bind()	2
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:193:6:void enter_system_bootloader()	0
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:204:6:void init_once()	1
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:212:6:void init()	2
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:255:1:void SUBGHZ_Radio_IRQHandler()	5
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:305:6:void link_task_init()	1
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:315:6:bool link_task_set(uint8_t)	5
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:339:6:void link_task_reset()	1
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:347:6:void link_task_tick_ms()	4
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:363:6:void process_received_rxcmdframe(tRxFrame*)	3
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:383:6:void pack_txcmdframe(tTxFrame*, tFrameStats*, tRcData*)	5
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:448:6:void process_received_frame(bool, tRxFrame*)	4
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:478:6:void handle_receive(uint8_t)	4
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:523:6:void handle_receive_none()	1
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:547:9:uint8_t do_receive(uint8_t)	4
+D:/mLRS/mLRS/CommonTx/../Common/libs/fifo.h:47:14:uint16_t FifoBase<T, FIFO_SIZE>::Available() [with T = char; short unsigned int FIFO_SIZE = 512]	2
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:325:6:bool tTxMavlink::available()	2
+D:/mLRS/mLRS/CommonTx/sx_serial_interface_tx.h:57:6:virtual bool tTxSxSerial::available()	3
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:405:6:void prepare_transmit_frame(uint8_t, uint8_t)	6
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:530:6:void do_transmit(uint8_t)	2
+D:/mLRS/mLRS/CommonTx/mavlink_interface_tx.h:153:6:void tTxMavlink::Do()	27
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:609:5:int main_main()	116
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:138:9:uint8_t tMBridge::send_serial()	4
+D:/mLRS/mLRS/CommonTx/mbridge_interface.h:114:6:virtual bool tMBridge::transmit_start()	4
+D:/mLRS/mLRS/CommonTx/mlrs-tx.cpp:1146:1:cpp)	1
