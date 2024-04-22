@@ -11,6 +11,9 @@
 #pragma once
 
 
+#include "hal/hal.h"
+
+
 #ifndef DEVICE_HAS_BUZZER
 
 class tBuzzer
@@ -79,7 +82,6 @@ void tBuzzer::BeepLQ(uint8_t LQ)
 //-------------------------------------------------------
 // Low-level beep implementation
 //-------------------------------------------------------
-
 
 volatile uint16_t buzzer_repetition_counter;
 

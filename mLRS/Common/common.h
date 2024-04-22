@@ -27,26 +27,6 @@
 
 
 //-------------------------------------------------------
-// SysTask
-//-------------------------------------------------------
-
-volatile uint32_t doSysTask = 0;
-
-
-void HAL_IncTick(void)
-{
-    uwTick += uwTickFreq;
-    doSysTask++;
-}
-
-
-volatile uint32_t millis32(void)
-{
-    return uwTick;
-}
-
-
-//-------------------------------------------------------
 // Serial Classes
 //-------------------------------------------------------
 
@@ -218,6 +198,7 @@ void sxReadFrame(uint8_t antenna, void* data, void* data2, uint8_t len)
 
 void sxSendFrame(uint8_t antenna, void* data, uint8_t len, uint16_t tmo_ms)
 {
+#if !defined DEVICE_HAS_DUAL_SX126x_SX128x && !defined DEVICE_HAS_DUAL_SX126x_SX126x
     if (antenna == ANTENNA_1) {
         sx.SendFrame((uint8_t*)data, len, tmo_ms);
         sx2.SetToIdle();
@@ -225,6 +206,10 @@ void sxSendFrame(uint8_t antenna, void* data, uint8_t len, uint16_t tmo_ms)
         sx2.SendFrame((uint8_t*)data, len, tmo_ms);
         sx.SetToIdle();
     }
+#else
+    sx.SendFrame((uint8_t*)data, len, tmo_ms);
+    sx2.SendFrame((uint8_t*)data, len, tmo_ms);
+#endif
 }
 
 

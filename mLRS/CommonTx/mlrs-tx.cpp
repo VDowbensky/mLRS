@@ -5,10 +5,8 @@
 // OlliW @ www.olliw.eu
 //*******************************************************
 // mLRS TX
-/********************************************************
+//********************************************************
 
-v0.0.00:
-*/
 
 #define DBG_MAIN(x)
 #define DBG_MAIN_SLIM(x)
@@ -29,6 +27,7 @@ v0.0.00:
 
 #include "../Common/common_conf.h"
 #include "../Common/common_types.h"
+
 #include "../Common/hal/glue.h"
 #include "../modules/stm32ll-lib/src/stdstm32.h"
 #include "../modules/stm32ll-lib/src/stdstm32-peripherals.h"
@@ -39,7 +38,6 @@ v0.0.00:
 #include "../modules/stm32ll-lib/src/stdstm32-subghz.h"
 #endif
 #include "../Common/hal/hal.h"
-#include "../Common/sx-drivers/sx12xx.h"
 #include "../modules/stm32ll-lib/src/stdstm32-delay.h" // these are dependent on hal
 #include "../modules/stm32ll-lib/src/stdstm32-eeprom.h"
 #include "../modules/stm32ll-lib/src/stdstm32-spi.h"
@@ -68,10 +66,12 @@ v0.0.00:
 #ifdef USE_I2C
 #include "../modules/stm32ll-lib/src/stdstm32-i2c.h"
 #endif
+#include "../Common/hal/timer.h"
+
+#include "../Common/sx-drivers/sx12xx.h"
 #include "../Common/mavlink/fmav.h"
 #include "../Common/setup.h"
 #include "../Common/common.h"
-#include "../Common/micros.h"
 #include "../Common/channel_order.h"
 #include "../Common/diversity.h"
 //#include "../Common/test.h" // un-comment if you want to compile for board test
@@ -203,6 +203,8 @@ void enter_system_bootloader(void)
 
 void init_once(void)
 {
+    hal_init();
+
     serial.InitOnce();
     comport.InitOnce();
     serial2.InitOnce();
@@ -214,15 +216,16 @@ void init_hw(void)
     // disable all interrupts, they may be enabled with restart
     __disable_irq();
 
+    hal_init();
+
     delay_init();
     systembootloader_init(); // after delay_init() since it may need delay
+    timer_init();
 
     leds_init();
     button_init();
     esp_init();
     fiveway_init();
-
-    micros_init();
 
     serial.Init();
     serial2.Init();
@@ -605,71 +608,72 @@ static inline bool connected_and_rx_setup_available(void)
 }
 
 
-int main_main(void)
+void main_loop(void)
 {
 #ifdef BOARD_TEST_H
-  main_test();
+    main_test();
 #endif
-  stack_check_init();
-  init_once();
-RESTARTCONTROLLER:
-  init_hw();
-  DBG_MAIN(dbg.puts("\n\n\nHello\n\n");)
+INITCONTROLLER_ONCE
+    stack_check_init();
+    init_once();
+RESTARTCONTROLLER
+    init_hw();
+    DBG_MAIN(dbg.puts("\n\n\nHello\n\n");)
 
-  serial.SetBaudRate(Config.SerialBaudrate);
-  serial2.SetBaudRate(Config.SerialBaudrate);
+    serial.SetBaudRate(Config.SerialBaudrate);
+    serial2.SetBaudRate(Config.SerialBaudrate);
 
-  // startup sign of life
-  leds.Init();
+    // startup sign of life
+    leds.Init();
 
-  // start up sx
-  if (!sx.isOk()) { FAILALWAYS(BLINK_RD_GR_OFF, "Sx not ok"); } // fail!
-  if (!sx2.isOk()) { FAILALWAYS(BLINK_GR_RD_OFF, "Sx2 not ok"); } // fail!
-  irq_status = irq2_status = 0;
-  IF_SX(sx.StartUp(&Config.Sx));
-  IF_SX2(sx2.StartUp(&Config.Sx));
-  bind.Init();
-  fhss.Init(&Config.Fhss);
-  fhss.Start();
+    // start up sx
+    if (!sx.isOk()) { FAILALWAYS(BLINK_RD_GR_OFF, "Sx not ok"); } // fail!
+    if (!sx2.isOk()) { FAILALWAYS(BLINK_GR_RD_OFF, "Sx2 not ok"); } // fail!
+    irq_status = irq2_status = 0;
+    IF_SX(sx.StartUp(&Config.Sx));
+    IF_SX2(sx2.StartUp(&Config.Sx2));
+    bind.Init();
+    fhss.Init(&Config.Fhss, &Config.Fhss2);
+    fhss.Start();
 
-  sx.SetRfFrequency(fhss.GetCurrFreq());
-  sx2.SetRfFrequency(fhss.GetCurrFreq());
+    sx.SetRfFrequency(fhss.GetCurrFreq());
+    sx2.SetRfFrequency(fhss.GetCurrFreq2());
 
-  tx_tick = 0;
-  doPreTransmit = false;
-  link_state = LINK_STATE_IDLE;
-  connect_state = CONNECT_STATE_LISTEN;
-  connect_tmo_cnt = 0;
-  connect_sync_cnt = 0;
-  connect_occured_once = false;
-  link_rx1_status = link_rx2_status = RX_STATUS_NONE;
-  link_task_init();
-  link_task_set(LINK_TASK_TX_GET_RX_SETUPDATA); // we start with wanting to get rx setup data
+    tx_tick = 0;
+    doPreTransmit = false;
+    link_state = LINK_STATE_IDLE;
+    connect_state = CONNECT_STATE_LISTEN;
+    connect_tmo_cnt = 0;
+    connect_sync_cnt = 0;
+    connect_occured_once = false;
+    link_rx1_status = link_rx2_status = RX_STATUS_NONE;
+    link_task_init();
+    link_task_set(LINK_TASK_TX_GET_RX_SETUPDATA); // we start with wanting to get rx setup data
 
-  txstats.Init(Config.LQAveragingPeriod);
-  rdiversity.Init();
-  tdiversity.Init(Config.frame_rate_ms);
+    txstats.Init(Config.LQAveragingPeriod);
+    rdiversity.Init();
+    tdiversity.Init(Config.frame_rate_ms);
 
-  in.Configure(Setup.Tx[Config.ConfigId].InMode);
-  mavlink.Init(&serial, &mbridge, &serial2); // ports selected by SerialDestination, ChannelsSource
-  sx_serial.Init(&serial, &mbridge, &serial2); // ports selected by SerialDestination, ChannelsSource
-  cli.Init(&comport);
-  esp_enable(Setup.Tx[Config.ConfigId].SerialDestination);
+    in.Configure(Setup.Tx[Config.ConfigId].InMode);
+    mavlink.Init(&serial, &mbridge, &serial2); // ports selected by SerialDestination, ChannelsSource
+    sx_serial.Init(&serial, &mbridge, &serial2); // ports selected by SerialDestination, ChannelsSource
+    cli.Init(&comport);
+    esp_enable(Setup.Tx[Config.ConfigId].SerialDestination);
 #ifdef DEVICE_HAS_ESP_WIFI_BRIDGE_ON_SERIAL
-  esp.Init(&comport, &serial);
+    esp.Init(&comport, &serial);
 #else
-  esp.Init(&comport, &serial2);
+    esp.Init(&comport, &serial2);
 #endif
-  fan.SetPower(sx.RfPower_dbm());
-  whileTransmit.Init();
-  disp.Init();
+    fan.SetPower(sx.RfPower_dbm());
+    whileTransmit.Init();
+    disp.Init();
 
-  config_id.Init();
+    config_id.Init();
 
-  tick_1hz = 0;
-  tick_1hz_commensurate = 0;
-  doSysTask = 0; // helps in avoiding too short first loop
-  while (1) {
+    tick_1hz = 0;
+    tick_1hz_commensurate = 0;
+    doSysTask = 0; // helps in avoiding too short first loop
+INITCONTROLLER_END
 
     //-- SysTask handling
 
@@ -732,7 +736,7 @@ RESTARTCONTROLLER:
     case LINK_STATE_TRANSMIT:
         fhss.HopToNext();
         sx.SetRfFrequency(fhss.GetCurrFreq());
-        sx2.SetRfFrequency(fhss.GetCurrFreq());
+        sx2.SetRfFrequency(fhss.GetCurrFreq2());
         do_transmit(tdiversity.Antenna());
         link_state = LINK_STATE_TRANSMIT_WAIT;
         irq_status = irq2_status = 0;
@@ -933,7 +937,7 @@ IF_SX2(
         if (doParamsStore) {
             leds.SetToParamStore();
             setup_store_to_EEPROM();
-            goto RESTARTCONTROLLER;
+            GOTO_RESTARTCONTROLLER;
         }
 
         bind.Do();
@@ -945,13 +949,13 @@ IF_SX2(
             connect_state = CONNECT_STATE_LISTEN;
             // link_state was set to LINK_STATE_TRANSMIT already
             break;
-        case BIND_TASK_TX_RESTART_CONTROLLER: goto RESTARTCONTROLLER; break;
+        case BIND_TASK_TX_RESTART_CONTROLLER: GOTO_RESTARTCONTROLLER; break;
         }
 
 //dbg.puts((valid_frame_received) ? "\nvalid" : "\ninval");
     }//end of if(doPreTransmit)
 
-    if (link_state != link_state_before) continue; // link state has changed, so process immediately
+    if (link_state != link_state_before) return; // link state has changed, so process immediately
 
     //-- Update channels, MBridge handling, Crsf handling, In handling, etc
 
@@ -1116,7 +1120,7 @@ IF_IN(
 
     esp.Do();
     uint8_t esp_task = esp.Task();
-    if (esp_task == ESP_TASK_RESTART_CONTROLLER) goto RESTARTCONTROLLER;
+    if (esp_task == ESP_TASK_RESTART_CONTROLLER) { GOTO_RESTARTCONTROLLER; }
 
     //-- more
 
@@ -1124,7 +1128,5 @@ IF_IN(
         doParamsStore = true;
     }
 
-  }//end of while(1) loop
-
-}//end of main
+}//end of main_loop
 

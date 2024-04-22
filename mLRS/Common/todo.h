@@ -52,10 +52,7 @@ The 3 MAIN topics TODO:
 2) Parameters, usability
 - firmware update: via connection to USB on tx module, for receiver ota-passthrough
 
-3) Mavlink
-- router on Tx side
-
-4) Auxiliary features
+3) Auxiliary features
 - relay setup, how can this be done? https://github.com/olliw42/mLRS/pull/123
 - 2.4 GHz high-interference mode bw 400kHz, at least for experiment to evaluate
 - beacon mode
@@ -63,13 +60,11 @@ The 3 MAIN topics TODO:
 
 
 TODO:
-- effect of USE_DCDC? where to place it??
+- effect of USE_REGULATOR_MODE_DCDC? where to place it??
 
 
 Longterm TODO:
 - support high_latency2
-
-- get a clean HAL concept
 
 - when we eventually do OTA update of the rx, the rx firmware must be universal in the sense that it supports all possible
   rx boards. Gladly, rx modules are relatively simple. But: Craft a concept which hopefully will last for a long time.

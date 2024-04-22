@@ -62,10 +62,12 @@ In tx-hal files:
 #define DEVICE_HAS_ESP_WIFI_BRIDGE_ON_SERIAL  // board has ESP32 with RESET,GPIO support, on Serial port
 #define DEVICE_HAS_ESP_WIFI_BRIDGE_ON_SERIAL2 // board has ESP32 with RESET,GPIO support, on Serial2 port
 #define DEVICE_HAS_SYSTEMBOOT       // board has a means to invoke the system bootloader on startup
+#define DEVICE_HAS_SINGLE_LED       // board has only one LED
 
 In rx-hal files:
 
 #define DEVICE_HAS_DIVERSITY        // board supports diversity
+#define DEVICE_HAS_DIVERSITY_SINGLE_SPI // board supports diversity on a single SPI bus
 #define DEVICE_HAS_OUT              // board has an OUT port, which supports both normal and inverted UART signals
 #define DEVICE_HAS_OUT_NORMAL       // board has an OUT port, which supports only normal UART signals
 #define DEVICE_HAS_OUT_INVERTED     // board has an OUT port, which supports only inverted UART signals
@@ -75,6 +77,7 @@ In rx-hal files:
 #define DEVICE_HAS_BUZZER           // board has a Buzzer
 #define DEVICE_HAS_I2C_DAC          // board has a DAC for power control on I2C
 #define DEVICE_HAS_SYSTEMBOOT       // board has a means to invoke the system bootloader on startup
+#define DEVICE_HAS_SINGLE_LED       // board has only one LED
 
 Note: Some "high-level" features are set for each device in the device_conf.h file, and not in the device's hal file.
 */
@@ -86,122 +89,171 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 //-- FrsKy R9 system
 
 #ifdef RX_R9MX_868_L433CB
-#include "rx-hal-R9MX-868-l433cb.h"
+#include "stm32/rx-hal-R9MX-868-l433cb.h"
 #endif
 #ifdef RX_R9M_868_F103C8
-#include "rx-hal-R9M-868-f103c8.h"
+#include "stm32/rx-hal-R9M-868-f103c8.h"
 #endif
 #ifdef RX_R9MM_868_F103RB
-#include "rx-hal-R9MM-868-f103rb.h"
+#include "stm32/rx-hal-R9MM-868-f103rb.h"
 #endif
 #ifdef RX_R9MLITEPRO_F303CC
-#include "rx-hal-R9MLitePro-v15-f303cc.h"
+#include "stm32/rx-hal-R9MLitePro-v15-f303cc.h"
 #endif
 
 #ifdef TX_R9M_868_F103C8
-#include "tx-hal-R9M-868-f103c8.h"
+#include "stm32/tx-hal-R9M-868-f103c8.h"
 #endif
 #ifdef TX_R9MX_868_L433CB
-#include "tx-hal-R9MX-868-l433cb.h"
+#include "stm32/tx-hal-R9MX-868-l433cb.h"
 #endif
 
 
 //-- SeeedStudio WioE5 boards
 
 #ifdef RX_WIO_E5_GROVE_WLE5JC
-#include "rx-hal-WioE5-Grove-wle5jc.h"
+#include "stm32/rx-hal-WioE5-Grove-wle5jc.h"
 #endif
 #ifdef RX_WIO_E5_MINI_WLE5JC
-#include "rx-hal-WioE5-Mini-wle5jc.h"
+#include "stm32/rx-hal-WioE5-Mini-wle5jc.h"
 #endif
 
 #ifdef TX_WIO_E5_MINI_WLE5JC
-#include "tx-hal-WioE5-Mini-wle5jc.h"
+#include "stm32/tx-hal-WioE5-Mini-wle5jc.h"
 #endif
 
 
 //-- EByte MBL Evaluation Kits
 
 #ifdef RX_E77_MBLKIT_WLE5CC
-#include "rx-hal-E77-MBLKit-wle5cc.h"
+#include "stm32/rx-hal-E77-MBLKit-wle5cc.h"
 #endif
 
 #ifdef TX_E77_MBLKIT_WLE5CC
-#include "tx-hal-E77-MBLKit-wle5cc.h"
+#include "stm32/tx-hal-E77-MBLKit-wle5cc.h"
 #endif
 
 
 //-- FlySky FRM303 2.4 GHz Device
 
 #ifdef RX_FRM303_F072CB
-#include "rx-hal-FRM303-f072cb.h"
+#include "stm32/rx-hal-FRM303-f072cb.h"
 #endif
 
 #ifdef TX_FRM303_F072CB
-#include "tx-hal-FRM303-f072cb.h"
+#include "stm32/tx-hal-FRM303-f072cb.h"
 #endif
 
 
 //-- DIY Boards, 2.4 GHz Devices
 
 #ifdef RX_DIY_BOARD01_F103CB
-#include "rx-hal-diy-board01-f103cb.h"
+#include "stm32/rx-hal-diy-board01-f103cb.h"
 #endif
 #ifdef RX_DIY_E28DUAL_BOARD02_F103CB
-#include "rx-hal-diy-e28dual-board02-f103cb.h"
+#include "stm32/rx-hal-diy-e28dual-board02-f103cb.h"
 #endif
 #ifdef RX_DIY_E28_G441KB
-#include "rx-hal-diy-e28-g441kb.h"
+#include "stm32/rx-hal-diy-e28-g441kb.h"
 #endif
 
 #ifdef TX_DIY_E28DUAL_BOARD02_F103CB
-#include "tx-hal-diy-e28dual-board02-f103cb.h"
+#include "stm32/tx-hal-diy-e28dual-board02-f103cb.h"
 #endif
 #ifdef TX_DIY_E28_G431KB
-#include "tx-hal-diy-e28-g431kb.h"
+#include "stm32/tx-hal-diy-e28-g431kb.h"
 #endif
 #ifdef TX_DIY_BOARD01_G491RE
-#include "tx-hal-diy-board01-g491re.h"
+#include "stm32/tx-hal-diy-board01-g491re.h"
 #endif
 #ifdef TX_DIY_SXDUAL_MODULE02_G491RE
-#include "tx-hal-diy-sxdual-module02-g491re.h"
+#include "stm32/tx-hal-diy-sxdual-module02-g491re.h"
 #endif
 #ifdef TX_DIY_E28DUAL_MODULE02_G491RE
-#include "tx-hal-diy-e28dual-module02-g491re.h"
+#include "stm32/tx-hal-diy-e28dual-module02-g491re.h"
 #endif
 
 
 //-- DIY Boards, 868/915 MHz Devices
 
 #ifdef RX_DIY_E22_G441KB
-#include "rx-hal-diy-e22-g441kb.h"
+#include "stm32/rx-hal-diy-e22-g441kb.h"
 #endif
 
 #ifdef TX_DIY_E22_G431KB
-#include "tx-hal-diy-e22-g431kb.h"
+#include "stm32/tx-hal-diy-e22-g431kb.h"
 #endif
 
 #ifdef TX_DIY_E22DUAL_MODULE02_G491RE
-#include "tx-hal-diy-e22dual-module02-g491re.h"
+#include "stm32/tx-hal-diy-e22dual-module02-g491re.h"
 #endif
 
 #ifdef RX_DIY_WIOE5_E22_WLE5JC
-#include "rx-hal-diy-wioe5-e22-wle5jc.h"
+#include "stm32/rx-hal-diy-wioe5-e22-wle5jc.h"
 #endif
 
 #ifdef TX_DIY_WIOE5_E22_WLE5JC
-#include "tx-hal-diy-wioe5-e22-wle5jc.h"
+#include "stm32/tx-hal-diy-wioe5-e22-wle5jc.h"
 #endif
 
 
 //-- DIY "easy-to-solder" Boards
 
-#ifdef RX_DIY_E77_E22_WLE5CC
-#include "rx-hal-easysolder-e77-e22-wle5cc.h"
+#if defined RX_DIY_E77_E22_WLE5CC || defined RX_DIY_E77_E22_DUALBAND_WLE5CC
+#include "stm32/rx-hal-easysolder-e77-e22-wle5cc.h"
 #endif
 
-#ifdef TX_DIY_E77_E22_WLE5CC
-#include "tx-hal-easysolder-e77-e22-wle5cc.h"
+#if defined TX_DIY_E77_E22_WLE5CC || defined TX_DIY_E77_E22_DUALBAND_WLE5CC
+#include "stm32/tx-hal-easysolder-e77-e22-wle5cc.h"
+#endif
+
+#ifdef RX_DIY_E77_E28_DUALBAND_WLE5CC
+#include "stm32/rx-hal-easysolder-e77-e28-dualband-wle5cc.h"
+#endif
+
+#ifdef TX_DIY_E77_E28_DUALBAND_WLE5CC
+#include "stm32/tx-hal-easysolder-e77-e28-dualband-wle5cc.h"
+#endif
+
+
+//-------------------------------------------------------
+// ESP Boards
+//-------------------------------------------------------
+
+//-- ELRS 868/915 MHz Generic Devices
+
+#ifdef RX_ELRS_GENERIC_900_ESP8285
+#include "esp/rx-hal-generic-900-esp8285.h"
+#endif
+
+#ifdef RX_ELRS_GENERIC_900_PA_ESP8285
+#include "esp/rx-hal-generic-900-pa-esp8285.h"
+#endif
+
+//-- ELRS 2.4 GHz Generic Devices
+
+#ifdef RX_ELRS_GENERIC_2400_ESP8285
+#include "esp/rx-hal-generic-2400-esp8285.h"
+#endif
+
+#ifdef RX_ELRS_GENERIC_2400_PA_ESP8285
+#include "esp/rx-hal-generic-2400-pa-esp8285.h"
+#endif
+
+//-- ELRS Selected Devices
+
+#ifdef RX_ELRS_BAYCK_NANO_PRO_900_ESP8285
+#include "esp/rx-hal-generic-900-pa-esp8285.h"
+#endif
+
+#ifdef RX_ELRS_SPEEDYBEE_NANO_2400_ESP8285
+#include "esp/rx-hal-generic-2400-pa-esp8285.h"
+#endif
+
+// -- DIY
+
+#ifdef RX_DIYBOARD_900_ESP8266
+#include "esp/rx-hal-dev-sx1278-esp8266.h"
 #endif
 
 
@@ -302,7 +354,7 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #endif
 
 
-#ifdef DEVICE_HAS_SX126x
+#if defined DEVICE_HAS_SX126x || defined DEVICE_HAS_DUAL_SX126x_SX128x || defined DEVICE_HAS_DUAL_SX126x_SX126x
   #define SX_DRIVER Sx126xDriver
 #elif defined DEVICE_HAS_SX127x
   #define SX_DRIVER Sx127xDriver
@@ -310,7 +362,7 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
   #define SX_DRIVER Sx128xDriver
 #endif
 
-#ifdef DEVICE_HAS_DIVERSITY
+#if defined DEVICE_HAS_DIVERSITY || defined DEVICE_HAS_DIVERSITY_SINGLE_SPI
   #ifdef DEVICE_HAS_SX126x
     #define SX2_DRIVER Sx126xDriver2
   #elif defined DEVICE_HAS_SX127x
@@ -318,11 +370,17 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
   #else
     #define SX2_DRIVER Sx128xDriver2
   #endif
+#elif defined DEVICE_HAS_DUAL_SX126x_SX128x
+  #define SX2_DRIVER Sx128xDriver2
+#elif defined DEVICE_HAS_DUAL_SX126x_SX126x
+  #define SX2_DRIVER Sx126xDriver2
 #else
   #define SX2_DRIVER SxDriverDummy
 #endif
 
-#ifdef DEVICE_HAS_DIVERSITY
+
+#if defined DEVICE_HAS_DIVERSITY || defined DEVICE_HAS_DIVERSITY_SINGLE_SPI || \
+    defined DEVICE_HAS_DUAL_SX126x_SX128x || defined DEVICE_HAS_DUAL_SX126x_SX126x
   #define USE_SX2
 #endif
 
@@ -368,7 +426,8 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
   #error Must be either transmitter or receiver !
 #endif
 
-#if !defined DEVICE_HAS_SX128x && !defined DEVICE_HAS_SX127x && !defined DEVICE_HAS_SX126x
+#if !defined DEVICE_HAS_SX128x && !defined DEVICE_HAS_SX127x && !defined DEVICE_HAS_SX126x && \
+    !defined DEVICE_HAS_DUAL_SX126x_SX128x && !defined DEVICE_HAS_DUAL_SX126x_SX126x
   #error Must be either SX128x or SX127x or SX126x !
 #endif
 
@@ -384,16 +443,21 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 //-------------------------------------------------------
 // should be in the device hal files, but is just so much more convenient to have them here
 
+#ifndef SYSTICK_TIMESTEP
+  #define SYSTICK_TIMESTEP          1000 // 1 ms
+#endif
+
+
 #ifndef DEVICE_HAS_SYSTEMBOOT
-    void systembootloader_init(void) {}
+  void systembootloader_init(void) {}
 #endif
 
 #ifndef USE_ESP_WIFI_BRIDGE
-    void esp_init(void) {}
+  void esp_init(void) {}
 #endif
 
 #if !defined DEVICE_HAS_FIVEWAY && !defined USE_DISPLAY
-    void fiveway_init(void) {}
+  void fiveway_init(void) {}
 #endif
 
 #endif // HAL_H
