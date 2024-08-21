@@ -19,10 +19,11 @@
 class tTxDisp
 {
   public:
-    void Init(void) {};
-    void Tick_ms(void) {};
-    uint8_t Task(void) { return 0; };
-    void DrawBoot(void) {};
+    void Init(void) {}
+    void Tick_ms(void) {}
+    uint8_t Task(void) { return 0; }
+    void DrawNotify(const char* s) {}
+    void DrawBoot(void) {}
 };
 
 #else
@@ -33,8 +34,12 @@ class tTxDisp
 #include "../Common/thirdparty/gfxfontFreeMono12pt7b.h"
 #include "../Common/thirdparty/gfxfontFreeMono9pt7b.h"
 #include "../Common/thirdparty/gdisp.h"
+#include "../Common/thirdparty/mlrs-logo.h"
 
 
+extern bool connected(void);
+extern bool connected_and_rx_setup_available(void);
+extern tStats stats;
 extern tGDisplay gdisp;
 
 
@@ -75,6 +80,29 @@ typedef enum {
 } SUBPAGE_ENUM;
 
 
+typedef enum {
+    DISP_ACTION_STORE = 0,
+    DISP_ACTION_BIND,
+    DISP_ACTION_BOOT,
+    DISP_ACTION_FLASH_ESP,
+} DISP_ACTION_ENUM;
+
+
+const uint8_t disp_actions[] = {
+    DISP_ACTION_STORE,
+    DISP_ACTION_BIND,
+#if !(defined ESP8266 || defined ESP32) // ESP cannot be put into boot
+    DISP_ACTION_BOOT,
+#endif
+#ifdef USE_ESP_WIFI_BRIDGE
+    DISP_ACTION_FLASH_ESP,
+#endif
+};
+
+
+#define DISP_ACTION_NUM  sizeof(disp_actions)
+
+
 class tTxDisp
 {
   public:
@@ -86,7 +114,6 @@ class tTxDisp
     uint8_t Task(void);
     void DrawNotify(const char* s);
     void DrawBoot(void);
-    void DrawFlashEsp(void);
 
     typedef struct {
         uint8_t list[SETUP_PARAMETER_NUM];
@@ -168,7 +195,7 @@ void tTxDisp::Init(void)
 #endif
     }
 
-    task_pending = CLI_TASK_NONE;
+    task_pending = TX_TASK_NONE;
     connected_last = false;
     setupmetadata_rx_available_last = false;
 
@@ -208,14 +235,14 @@ void tTxDisp::Init(void)
     idx_max = 0;
     idx_focused_in_edit = false;
     idx_focused_pos = 0;
-    idx_focused_task_pending = CLI_TASK_NONE;
+    idx_focused_task_pending = TX_TASK_NONE;
 }
 
 
 uint8_t tTxDisp::Task(void)
 {
     uint8_t task = task_pending;
-    task_pending = 0;
+    task_pending = TX_TASK_NONE;
     return task;
 }
 
@@ -395,8 +422,8 @@ if(!idx_focused_in_edit){
     if (edit_setting()) { // edit, and finish if true
         idx_focused_in_edit = false;
         page_modified = true;
-        if (idx_focused_task_pending != CLI_TASK_NONE) task_pending = idx_focused_task_pending;
-        idx_focused_task_pending = CLI_TASK_NONE;
+        if (idx_focused_task_pending != TX_TASK_NONE) task_pending = idx_focused_task_pending;
+        idx_focused_task_pending = TX_TASK_NONE;
     }
 
 }
@@ -414,12 +441,7 @@ void tTxDisp::page_init(void)
         case PAGE_COMMON: idx_max = common_list.num - 1; break;
         case PAGE_TX: idx_max = tx_list.num - 1; break;
         case PAGE_RX: idx_max = rx_list.num - 1; break;
-        case PAGE_ACTIONS: 
-            idx_max = 2; 
-#ifdef USE_ESP_WIFI_BRIDGE
-            idx_max++;
-#endif
-            break;
+        case PAGE_ACTIONS: idx_max = DISP_ACTION_NUM - 1; break;
     }
 
     subpage = SUBPAGE_DEFAULT;
@@ -432,20 +454,22 @@ void tTxDisp::page_init(void)
 
 void tTxDisp::run_action(void)
 {
-    switch (idx_focused) {
-    case 0: // STORE
+    if (idx_focused >= DISP_ACTION_NUM) while(1){}; // should never happen
+
+    switch (disp_actions[idx_focused]) {
+    case DISP_ACTION_STORE:
         page = PAGE_NOTIFY_STORE;
         page_modified = true;
-        task_pending = CLI_TASK_PARAM_STORE;
+        task_pending = TX_TASK_PARAM_STORE;
         break;
-    case 1: // BIND
-        task_pending = CLI_TASK_BIND;
+    case DISP_ACTION_BIND:
+        task_pending = TX_TASK_BIND;
         break;
-    case 2: // BOOT
-        task_pending = CLI_TASK_BOOT;
+    case DISP_ACTION_BOOT:
+        task_pending = TX_TASK_SYSTEM_BOOT;
         break;
-    case 3: // FLASH ESP
-        task_pending = CLI_TASK_FLASH_ESP;
+    case DISP_ACTION_FLASH_ESP:
+        task_pending = TX_TASK_FLASH_ESP;
         break;
     }
 }
@@ -469,6 +493,7 @@ void tTxDisp::SetBind(void)
 void tTxDisp::DrawNotify(const char* s)
 {
     if (!initialized) return;
+    page_modified = true;
     draw_page_notify(s);
     gdisp_update();
     page_modified = false;
@@ -632,12 +657,17 @@ void tTxDisp::draw_page_startup(void)
     if (!page_modified) return;
 
     gdisp_clear();
+/*
     gdisp_setcurXY(0, 6);
     gdisp_setfont(&FreeMono12pt7b);
     gdisp_setcurY(33-10); gdisp_puts_XCentered("mLRS");
     gdisp_unsetfont();
     gdisp_setcurY(48); gdisp_puts_XCentered(DEVICE_NAME);
     gdisp_setcurY(60); gdisp_puts_XCentered(VERSIONONLYSTR);
+*/
+    gdisp_drawbitmap(23, 0, mlrs_logo_91x38_bw, 91, 38, 1);
+    gdisp_setcurY(52); gdisp_puts_XCentered(DEVICE_NAME);
+    gdisp_setcurY(63); gdisp_puts_XCentered(VERSIONONLYSTR);
 }
 
 
@@ -712,7 +742,7 @@ int8_t power;
     if (connected()) gdisp_puts(s);
 
     gdisp_setcurXY(5 + 11, 4 * 10 + 20 + 1);
-    stoBCDstr(txstats.GetLQ_serial(), s);
+    stoBCDstr(stats.GetLQ_serial(), s);
     gdisp_puts(s);
     gdisp_setcurX(60 + 11);
     if (connected()) {
@@ -967,38 +997,42 @@ void tTxDisp::draw_page_actions(void)
     gdisp_setfont(&FreeMono9pt7b);
 
     uint8_t idx = 0;
+
     gdisp_setcurXY(5, idx * 16 + 25);
     if (idx == idx_focused) gdisp_setinverted();
     gdisp_puts("STORE");
     gdisp_unsetinverted();
+    idx++;
 
-/*    idx++;
-    gdisp_setcurXY(5, idx * 16 + 25);
+/*    gdisp_setcurXY(5, idx * 16 + 25);
     if (idx == idx_focused) gdisp_setinverted();
     gdisp_puts("RELOAD");
-    gdisp_unsetinverted(); */
+    gdisp_unsetinverted();
+    idx++; */
 
-    idx++;
     gdisp_setcurXY(5, idx * 16 + 25);
     if (idx == idx_focused) gdisp_setinverted();
     gdisp_puts("BIND");
     gdisp_unsetinverted();
+    idx++;
 
     gdisp_unsetfont();
 
-    idx++;
-    gdisp_setcurXY(75, (idx - 2) * 11 + 20);
-    if (idx == idx_focused) gdisp_setinverted();
-    gdisp_puts("BOOT");
-    gdisp_unsetinverted();
+    if ((idx < DISP_ACTION_NUM) && (disp_actions[idx] == DISP_ACTION_BOOT)) {
+        gdisp_setcurXY(75, (idx - 2) * 11 + 20);
+        if (idx == idx_focused) gdisp_setinverted();
+        gdisp_puts("BOOT");
+        gdisp_unsetinverted();
+        idx++;
+    }
 
-#ifdef USE_ESP_WIFI_BRIDGE
-    idx++;
-    gdisp_setcurXY(75, (idx - 2) * 11 + 20);
-    if (idx == idx_focused) gdisp_setinverted();
-    gdisp_puts("FLASH "); gdisp_movecurX(-2); gdisp_puts("ESP");
-    gdisp_unsetinverted();
-#endif
+    if ((idx < DISP_ACTION_NUM) && (disp_actions[idx] == DISP_ACTION_FLASH_ESP)) {
+        gdisp_setcurXY(75, (idx - 2) * 11 + 20);
+        if (idx == idx_focused) gdisp_setinverted();
+        gdisp_puts("FLASH "); gdisp_movecurX(-2); gdisp_puts("ESP");
+        gdisp_unsetinverted();
+        idx++;
+    }
 }
 
 
@@ -1096,7 +1130,7 @@ bool tTxDisp::edit_setting(void)
 
     }
 
-    if (rx_param_changed) idx_focused_task_pending = CLI_TASK_RX_PARAM_SET;
+    if (rx_param_changed) idx_focused_task_pending = TX_TASK_RX_PARAM_SET;
     return false; // keep on editing
 }
 

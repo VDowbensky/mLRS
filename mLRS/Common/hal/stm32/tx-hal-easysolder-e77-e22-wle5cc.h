@@ -12,6 +12,7 @@
 //#define MLRS_DEV_FEATURE_JRPIN5_SDIODE
 //#define MLRS_FEATURE_DIVERSITY
 //#define MLRS_FEATURE_NO_DIVERSITY
+//#define MLRS_FEATURE_E77_XTAL // must be defined high up, not here, affects main !
 
 //-------------------------------------------------------
 // TX DIY "easy-to-solder" E77 E22 dual, STM32WLE5CC
@@ -117,7 +118,9 @@
 #define SX_DIO_EXTI_IRQHandler        SUBGHZ_Radio_IRQHandler
 //#define SX_DIO_EXTI_IRQ_PRIORITY    11
 
+#ifdef MLRS_FEATURE_E77_XTAL
 #define SX_USE_CRYSTALOSCILLATOR
+#endif
 
 void sx_init_gpio(void)
 {
@@ -334,19 +337,8 @@ bool ser_or_com_serial(void)
 
 //-- POWER
 
-#define POWER_GAIN_DBM            0 // gain of a PA stage if present
-#define POWER_SX126X_MAX_DBM      SX126X_POWER_MAX // maximum allowed sx power
-#define POWER_USE_DEFAULT_RFPOWER_CALC
-
-#define RFPOWER_DEFAULT           2 // index into rfpower_list array
-
-const rfpower_t rfpower_list[] = {
-    { .dbm = POWER_MIN, .mW = INT8_MIN },
-    { .dbm = POWER_0_DBM, .mW = 1 },
-    { .dbm = POWER_10_DBM, .mW = 10 },
-    { .dbm = POWER_20_DBM, .mW = 100 },
-    { .dbm = POWER_22_DBM, .mW = 158 },
-};
+#define POWER_PA_NONE_SX126X
+#include "../hal-power-pa.h"
 
 
 //-- TEST

@@ -5,7 +5,7 @@
 // OlliW @ www.olliw.eu
 //*******************************************************
 // mLRS RX
-//********************************************************
+//*******************************************************
 
 
 #define DBG_MAIN(x)
@@ -20,7 +20,7 @@
 #define UART_IRQ_PRIORITY           12 // out pin
 #define UARTC_IRQ_PRIORITY          11 // debug
 #define SX_DIO_EXTI_IRQ_PRIORITY    13
-#define SX2_DIO_EXTI_IRQ_PRIORITY   13
+#define SX2_DIO_EXTI_IRQ_PRIORITY   13 // on single spi diversity systems must be equal to DIO priority
 #define SWUART_TIM_IRQ_PRIORITY      9 // debug on swuart
 #define BUZZER_TIM_IRQ_PRIORITY     14
 
@@ -87,24 +87,24 @@
 #include "powerup.h"
 #include "rxclock.h"
 
-#endif
+#endif //#if defined ESP8266 || defined ESP32
 
 #include "../Common/sx-drivers/sx12xx.h"
 #include "../Common/mavlink/fmav.h"
 #include "../Common/setup.h"
 #include "../Common/common.h"
 #include "../Common/diversity.h"
+#include "../Common/arq.h"
 //#include "../Common/test.h" // un-comment if you want to compile for board test
 
-#include "rxstats.h"
 #include "out_interface.h" // this includes uart.h, out.h, declares tOut out
 
 
-RxClockBase rxclock;
-PowerupCounterBase powerup;
-tRxStats rxstats;
+tRxClock rxclock;
+tPowerupCounter powerup;
 tRDiversity rdiversity;
 tTDiversity tdiversity;
+tTransmitArq tarq;
 
 
 // is required in bind.h
@@ -112,7 +112,7 @@ void clock_reset(void) { rxclock.Reset(); }
 
 
 //-------------------------------------------------------
-// Mavlink
+// MAVLink
 //-------------------------------------------------------
 
 #include "mavlink_interface_rx.h"
@@ -130,8 +130,6 @@ tRxSxSerial sx_serial;
 
 void init_hw(void)
 {
-    hal_init();
-    
     delay_init();
     systembootloader_init(); // after delay_init() since it may need delay
     timer_init();
@@ -142,7 +140,6 @@ void init_hw(void)
     serial.Init();
     out.Init();
 
-    buzzer.Init();
     fan.Init();
     dbg.Init();
 
@@ -276,45 +273,73 @@ void pack_rxcmdframe(tRxFrame* frame, tFrameStats* frame_stats)
 
 
 //-- normal Tx, Rx frames handling
+// receive
+//   isr:        -> irq2_status
+//   isr loop:   -> do_receive()
+//               -> link_rx1_status
+//   post loop:  -> handle_receive() or handle_receive_none()
+//                   if valid -> process_received_frame()
+// transmit
+//   -> do_transmit()
+//       -> prepare_transmit_frame()
 
-void prepare_transmit_frame(uint8_t antenna, uint8_t ack)
+void prepare_transmit_frame(uint8_t antenna)
 {
 uint8_t payload[FRAME_RX_PAYLOAD_LEN];
 uint8_t payload_len = 0;
 
-    if (transmit_frame_type == TRANSMIT_FRAME_TYPE_NORMAL) {
+    bool get_fresh_payload = tarq.GetFreshPayload();
 
-        // read data from serial
-        if (connected()) {
-            for (uint8_t i = 0; i < FRAME_RX_PAYLOAD_LEN; i++) {
-                if (!sx_serial.available()) break;
-                payload[payload_len] = sx_serial.getc();
-//dbg.putc(payload[payload_len]);
-                payload_len++;
+    if (get_fresh_payload) {
+        if (transmit_frame_type == TRANSMIT_FRAME_TYPE_NORMAL) {
+            // read data from serial
+            if (connected()) {
+                for (uint8_t i = 0; i < FRAME_RX_PAYLOAD_LEN; i++) {
+                    if (!sx_serial.available()) break;
+                    uint8_t c = sx_serial.getc();
+                    payload[payload_len++] = c;
+                }
+
+                stats.bytes_transmitted.Add(payload_len);
+                stats.serial_data_transmitted.Inc();
+            } else {
+                sx_serial.flush();
             }
-
-            stats.bytes_transmitted.Add(payload_len);
-            stats.serial_data_transmitted.Inc();
-        } else {
-            sx_serial.flush();
         }
     }
 
     stats.last_transmit_antenna = antenna;
 
     tFrameStats frame_stats;
-    frame_stats.seq_no = stats.transmit_seq_no;
-    frame_stats.ack = ack;
+    frame_stats.seq_no = tarq.SeqNo();
+    frame_stats.ack = 1; // TODO
     frame_stats.antenna = stats.last_antenna;
     frame_stats.transmit_antenna = antenna;
     frame_stats.rssi = stats.GetLastRssi();
-    frame_stats.LQ_rc = rxstats.GetLQ_rc();
-    frame_stats.LQ_serial = rxstats.GetLQ_serial();
+    frame_stats.LQ_rc = stats.GetLQ_rc();
+    frame_stats.LQ_serial = stats.GetLQ_serial();
 
-    if (transmit_frame_type == TRANSMIT_FRAME_TYPE_NORMAL) {
-        pack_rxframe(&rxFrame, &frame_stats, payload, payload_len);
+    static bool rxFrame_valid = false; // just for now
+    if (get_fresh_payload) {
+        if (transmit_frame_type == TRANSMIT_FRAME_TYPE_NORMAL) {
+            pack_rxframe(&rxFrame, &frame_stats, payload, payload_len);
+        } else {
+            pack_rxcmdframe(&rxFrame, &frame_stats);
+        }
+        rxFrame_valid = true;
+
+        stats.cntFrameTransmitted();
+        tarq.SetRetryCntAuto(stats.GetFrameCnt(), Config.Mode);
+
     } else {
-        pack_rxcmdframe(&rxFrame, &frame_stats);
+        // rxFrame should still hold the previous data
+        if (!rxFrame_valid) while(1){} // should not happen
+
+        update_rxframe_stats(&rxFrame, &frame_stats);
+        rxFrame_valid = true;
+
+        stats.cntFrameSkipped();
+        tarq.SetRetryCntAuto(stats.GetFrameCnt(), Config.Mode);
     }
 }
 
@@ -327,7 +352,7 @@ void process_received_frame(bool do_payload, tTxFrame* frame)
     // stats.received_LQ_rc = frame->status.LQ_rc; // has no vaid data in Tx frame
     stats.received_LQ_serial = frame->status.LQ_serial;
 
-    // copy rc data
+    // copy rc1 data
     if (!do_payload) {
         // copy only channels 1-4,12,13 and jump out
         rcdata_rc1_from_txframe(&rcData, frame);
@@ -345,22 +370,20 @@ void process_received_frame(bool do_payload, tTxFrame* frame)
     link_task_reset(); // clear it if non-cmd frame is received
 
     // output data on serial, but only if connected
-    if (connected()) {
-        for (uint8_t i = 0; i < frame->status.payload_len; i++) {
-            uint8_t c = frame->payload[i];
-            sx_serial.putc(c);
-//dbg.putc(c);
-        }
-
-        stats.bytes_received.Add(frame->status.payload_len);
-        stats.serial_data_received.Inc();
+    if (!connected()) return;
+    for (uint8_t i = 0; i < frame->status.payload_len; i++) {
+        uint8_t c = frame->payload[i];
+        sx_serial.putc(c);
     }
+
+    stats.bytes_received.Add(frame->status.payload_len);
+    stats.serial_data_received.Inc();
 }
 
 
 //-- receive/transmit handling api
 
-void handle_receive(uint8_t antenna)
+void handle_receive(uint8_t antenna) // RX_STATUS_INVALID, RX_STATUS_CRC1_VALID, RX_STATUS_VALID
 {
 uint8_t rx_status;
 tTxFrame* frame;
@@ -382,50 +405,47 @@ tTxFrame* frame;
         FAIL_WSTATE(BLINK_4, "rx_status failure", 0,0, link_rx1_status, link_rx2_status);
     }
 
+    // handle transmit ARQ
+    if (rx_status > RX_STATUS_INVALID) { // RX_STATUS_CRC1_VALID, RX_STATUS_VALID: we have valid information on ack
+        tarq.AckReceived(frame->status.ack);
+    } else {
+        tarq.FrameMissed();
+    }
+
     if (rx_status > RX_STATUS_INVALID) { // RX_STATUS_CRC1_VALID, RX_STATUS_VALID
 
         bool do_payload = (rx_status == RX_STATUS_VALID);
 
         process_received_frame(do_payload, frame);
 
-        rxstats.doValidCrc1FrameReceived();
-        if (rx_status == RX_STATUS_VALID) rxstats.doValidFrameReceived(); // should we count valid payload only if tx frame ?
-
-        stats.received_seq_no = frame->status.seq_no;
-        stats.received_ack = frame->status.ack;
+        stats.doValidCrc1FrameReceived();
+        if (rx_status == RX_STATUS_VALID) stats.doValidFrameReceived(); // should we count valid payload only if tx frame ?
 
     } else { // RX_STATUS_INVALID
-        stats.received_seq_no = UINT8_MAX;
-        stats.received_ack = 0;
     }
 
     // we set it for all received frames
     stats.last_antenna = antenna;
 
     // we count all received frames
-    rxstats.doFrameReceived();
+    stats.doFrameReceived();
 }
 
 
 void handle_receive_none(void) // RX_STATUS_NONE
 {
-    stats.received_seq_no = UINT8_MAX;
-    stats.received_ack = 0;
+    tarq.FrameMissed();
 }
 
 
 void do_transmit(uint8_t antenna) // we send a frame to transmitter
 {
-uint8_t ack = 1;
-
     if (bind.IsInBind()) {
         bind.do_transmit(antenna);
         return;
     }
 
-    stats.transmit_seq_no++;
-
-    prepare_transmit_frame(antenna, ack);
+    prepare_transmit_frame(antenna);
 
     // to test asymmetric connection, fake rxFrame, to no send doesn't work as it blocks the sx
     sxSendFrame(antenna, &rxFrame, FRAME_TX_RX_LEN, SEND_FRAME_TMO_MS); // 10ms tmo
@@ -489,7 +509,7 @@ bool doPostReceive2;
 bool frame_missed;
 
 
-static inline bool connected(void)
+bool connected(void)
 {
     return (connect_state == CONNECT_STATE_CONNECTED);
 }
@@ -536,9 +556,10 @@ RESTARTCONTROLLER
     doPostReceive2 = false;
     frame_missed = false;
 
-    rxstats.Init(Config.LQAveragingPeriod);
+    stats.Init(Config.LQAveragingPeriod, Config.frame_rate_hz, Config.frame_rate_ms);
     rdiversity.Init();
     tdiversity.Init(Config.frame_rate_ms);
+    tarq.Init();
 
     out.Configure(Setup.Rx.OutMode);
     mavlink.Init();
@@ -564,12 +585,13 @@ INITCONTROLLER_END
         DECc(tick_1hz, SYSTICK_DELAY_MS(1000));
 
         if (!connect_occured_once) bind.AutoBind();
+        fan.Tick_ms();
 
         if (!tick_1hz) {
             dbg.puts(".");
 /*            dbg.puts("\nRX: ");
-            dbg.puts(u8toBCD_s(rxstats.GetLQ_rc())); dbg.putc(',');
-            dbg.puts(u8toBCD_s(rxstats.GetLQ_serial()));
+            dbg.puts(u8toBCD_s(stats.GetLQ_rc())); dbg.putc(',');
+            dbg.puts(u8toBCD_s(stats.GetLQ_serial()));
             dbg.puts(" (");
             dbg.puts(u8toBCD_s(stats.frames_received.GetLQ())); dbg.putc(',');
             dbg.puts(u8toBCD_s(stats.valid_crc1_received.GetLQ())); dbg.putc(',');
@@ -797,20 +819,18 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
             sx2.SetToIdle();
         }
 
+        if (!connected()) tarq.Disconnected();
+
         DECc(tick_1hz_commensurate, Config.frame_rate_hz);
         if (!tick_1hz_commensurate) {
-            rxstats.Update1Hz();
+            stats.Update1Hz();
         }
-        rxstats.Next();
-        if (!connected()) rxstats.Clear();
+        stats.Next();
+        if (!connected()) stats.Clear();
 
         if (connect_state == CONNECT_STATE_LISTEN) {
             link_task_reset();
             link_task_set(LINK_TASK_RX_SEND_RX_SETUPDATA);
-        }
-
-        if (Setup.Rx.Buzzer == BUZZER_LOST_PACKETS && connect_occured_once && !bind.IsInBind()) {
-            if (!valid_frame_received) buzzer.BeepLP();
         }
 
         powerup.Do();
@@ -849,7 +869,7 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
 
         out.SetChannelOrder(Setup.Rx.ChannelOrder);
         if (connected()) {
-            out.SendRcData(&rcData, frame_missed, false, stats.GetLastRssi(), rxstats.GetLQ_rc());
+            out.SendRcData(&rcData, frame_missed, false, stats.GetLastRssi(), stats.GetLQ_rc());
             out.SendLinkStatistics();
             mavlink.SendRcData(out.GetRcDataPtr(), frame_missed, false);
         } else {
@@ -864,7 +884,7 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
 
     out.Do();
 
-    //-- Do mavlink
+    //-- Do MAVLink
 
     mavlink.Do();
 
@@ -879,4 +899,3 @@ dbg.puts(s8toBCD_s(stats.last_rssi2));*/
     }
 
 }//end of main_loop
-

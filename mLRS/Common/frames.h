@@ -37,7 +37,7 @@ uint16_t crc;
 
     if (payload_len > FRAME_TX_PAYLOAD_LEN) payload_len = FRAME_TX_PAYLOAD_LEN; // should never occur, but play it safe
 
-    memset(frame, 0, sizeof(tTxFrame));
+    memset((uint8_t*)frame, 0, sizeof(tTxFrame));
 
     // generate header
     frame->sync_word = Config.FrameSyncWord;
@@ -157,13 +157,35 @@ void rcdata_from_txframe(tRcData* rc, tTxFrame* frame)
 }
 
 
+// update header info with new data, keep payload
+void update_rxframe_stats(tRxFrame* frame, tFrameStats* frame_stats)
+{
+uint16_t crc;
+
+    frame->sync_word = Config.FrameSyncWord;
+    // keep !! frame->status.seq_no = frame_stats->seq_no;
+    frame->status.ack = frame_stats->ack;
+    // keep !! frame->status.frame_type = type; // FRAME_TYPE_RX, FRAME_TYPE_TX_RX_CMD
+    frame->status.antenna = frame_stats->antenna;
+    frame->status.transmit_antenna = frame_stats->transmit_antenna;
+    frame->status.rssi_u7 = rssi_u7_from_i8(frame_stats->rssi);
+    frame->status.LQ_rc = frame_stats->LQ_rc;
+    frame->status.LQ_serial = frame_stats->LQ_serial;
+    // keep !! frame->status.payload_len = payload_len;
+
+    fmav_crc_init(&crc);
+    fmav_crc_accumulate_buf(&crc, (uint8_t*)frame, FRAME_TX_RX_LEN - 2);
+    frame->crc = crc;
+}
+
+
 void _pack_rxframe_w_type(tRxFrame* frame, uint8_t type, tFrameStats* frame_stats, uint8_t* payload, uint8_t payload_len)
 {
 uint16_t crc;
 
     if (payload_len > FRAME_RX_PAYLOAD_LEN) payload_len = FRAME_RX_PAYLOAD_LEN; // should never occur, but play it safe
 
-    memset(frame, 0, sizeof(tRxFrame));
+    memset((uint8_t*)frame, 0, sizeof(tRxFrame));
 
     frame->sync_word = Config.FrameSyncWord;
     frame->status.seq_no = frame_stats->seq_no;
@@ -229,7 +251,7 @@ void cmdframerxparameters_rxparams_from_rxsetup(tCmdFrameRxParameters* rx_params
     rx_params->SerialBaudrate = Setup.Rx.SerialBaudrate;
     rx_params->SerialLinkMode = Setup.Rx.SerialLinkMode;
     rx_params->SendRadioStatus = Setup.Rx.SendRadioStatus;
-    rx_params->Buzzer = Setup.Rx.Buzzer;
+    // deprecated rx_params->Buzzer = Setup.Rx.Buzzer;
     rx_params->SendRcChannels = Setup.Rx.SendRcChannels;
     // deprecated rx_params->RadioStatusMethod = Setup.Rx.RadioStatusMethod;
 
@@ -255,7 +277,7 @@ void cmdframerxparameters_rxparams_to_rxsetup(tCmdFrameRxParameters* rx_params)
     Setup.Rx.SerialBaudrate = rx_params->SerialBaudrate;
     Setup.Rx.SerialLinkMode = rx_params->SerialLinkMode;
     Setup.Rx.SendRadioStatus = rx_params->SendRadioStatus;
-    Setup.Rx.Buzzer = rx_params->Buzzer;
+    // deprecated Setup.Rx.Buzzer = rx_params->Buzzer;
     Setup.Rx.SendRcChannels = rx_params->SendRcChannels;
     // deprecated Setup.Rx.RadioStatusMethod = rx_params->RadioStatusMethod;
 
@@ -308,7 +330,6 @@ tRxCmdFrameRxSetupData* rx_setupdata = (tRxCmdFrameRxSetupData*)frame->payload;
     power_optstr_from_power_list(SetupMetaData.Rx_Power_optstr, power_list, 8, 44);
     SetupMetaData.Rx_Diversity_allowed_mask = rx_setupdata->Diversity_allowed_mask;
     SetupMetaData.Rx_OutMode_allowed_mask = rx_setupdata->OutMode_allowed_mask;
-    SetupMetaData.Rx_Buzzer_allowed_mask = rx_setupdata->Buzzer_allowed_mask;
 }
 
 
@@ -332,17 +353,6 @@ tTxCmdFrameRxParams rx_params = {};
 
 #endif
 #ifdef DEVICE_IS_RECEIVER
-
-// Rx: send cmd to Tx
-void pack_rxcmdframe_cmd(tRxFrame* frame, tFrameStats* frame_stats, uint8_t cmd)
-{
-uint8_t payload[1];
-
-    payload[0] = cmd;
-
-    _pack_rxframe_w_type(frame, FRAME_TYPE_TX_RX_CMD, frame_stats, payload, 1);
-}
-
 
 // Rx: send FRAME_CMD_RX_SETUPDATA to Tx
 void pack_rxcmdframe_rxsetupdata(tRxFrame* frame, tFrameStats* frame_stats)
@@ -370,7 +380,6 @@ tRxCmdFrameRxSetupData rx_setupdata = {};
     }
     rx_setupdata.Diversity_allowed_mask = SetupMetaData.Rx_Diversity_allowed_mask;
     rx_setupdata.OutMode_allowed_mask = SetupMetaData.Rx_OutMode_allowed_mask;
-    rx_setupdata.Buzzer_allowed_mask = SetupMetaData.Rx_Buzzer_allowed_mask;
 
     _pack_rxframe_w_type(frame, FRAME_TYPE_TX_RX_CMD, frame_stats, (uint8_t*)&rx_setupdata, sizeof(rx_setupdata));
 }

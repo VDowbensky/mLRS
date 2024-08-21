@@ -45,16 +45,16 @@ void sx_init_gpio(void)
     gpio_init(SX_RESET, IO_MODE_OUTPUT_PP_HIGH);
 }
 
-void sx_amp_transmit(void) {}
-void sx_amp_receive(void) {}
+IRAM_ATTR void sx_amp_transmit(void) {}
+IRAM_ATTR void sx_amp_receive(void) {}
+void sx_dio_init_exti_isroff(void) {}
 
-IRAM_ATTR void sx_dio_enable_exti_isr(void)
+void sx_dio_enable_exti_isr(void)
 {
     attachInterrupt(SX_DIO0, SX_DIO_EXTI_IRQHandler, RISING);
 }
 
-void sx_dio_init_exti_isroff(void) {}
-void sx_dio_exti_isr_clearflag(void) {}
+IRAM_ATTR void sx_dio_exti_isr_clearflag(void) {}
 
 
 //-- Button
@@ -81,9 +81,9 @@ void leds_init(void)
     gpio_init(LED_RED, IO_MODE_OUTPUT_PP_LOW);
 }
 
-void led_red_off(void) { gpio_low(LED_RED); }
-void led_red_on(void) { gpio_high(LED_RED); }
-void led_red_toggle(void) { gpio_toggle(LED_RED); }
+IRAM_ATTR void led_red_off(void) { gpio_low(LED_RED); }
+IRAM_ATTR void led_red_on(void) { gpio_high(LED_RED); }
+IRAM_ATTR void led_red_toggle(void) { gpio_toggle(LED_RED); }
 
 
 //-- POWER

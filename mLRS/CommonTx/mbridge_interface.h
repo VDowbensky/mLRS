@@ -20,8 +20,9 @@
 
 
 extern uint16_t micros16(void);
+extern bool connected(void);
 extern uint8_t mavlink_vehicle_state(void);
-extern tTxStats txstats;
+extern tStats stats;
 
 
 //-------------------------------------------------------
@@ -78,7 +79,7 @@ class tMBridge : public tPin5BridgeBase, public tSerialBase
     // front end to communicate with mBridge
     // mimics a serial interface to the main code
     void putc(char c) { tx_fifo.Put(c); }
-    void putbuf(void* buf, uint16_t len) { tx_fifo.PutBuf(buf, len); }
+    void putbuf(uint8_t* buf, uint16_t len) { tx_fifo.PutBuf(buf, len); }
     bool available(void) { return rx_fifo.Available(); }
     char getc(void) { return rx_fifo.Get(); }
     void flush(void) { rx_fifo.Flush(); }
@@ -89,11 +90,11 @@ class tMBridge : public tPin5BridgeBase, public tSerialBase
     bool serial_rx_available(void) { return tx_fifo.Available(); }
     char serial_getc(void) { return tx_fifo.Get(); }
 
-    FifoBase<char,TX_MBRIDGE_TXBUFSIZE> tx_fifo; // TODO: how large do they really need to be?
-    FifoBase<char,TX_MBRIDGE_RXBUFSIZE> rx_fifo;
+    tFifo<char,TX_MBRIDGE_TXBUFSIZE> tx_fifo; // TODO: how large do they really need to be?
+    tFifo<char,TX_MBRIDGE_RXBUFSIZE> rx_fifo;
 
     // for communication
-    FifoBase<uint8_t,128> cmd_fifo; // TODO: how large does it really need to be?
+    tFifo<uint8_t,128> cmd_fifo; // TODO: how large does it really need to be?
     uint8_t cmd_in_process;
     uint8_t ack_cmd;
     bool ack_ok;
@@ -160,7 +161,7 @@ void tMBridge::send_command(void)
 #define MBRIDGE_TMO_US  250
 
 
-// is called in isr context, or in ParseCrsfFrame() in case of crsf emulatiom
+// is called in isr context, or in ParseCrsfFrame() in case of CRSF emulatiom
 void tMBridge::parse_nextchar(uint8_t c)
 {
     uint16_t tnow_us = micros16();
@@ -517,19 +518,16 @@ void mbridge_send_LinkStats(void)
 {
 tMBridgeLinkStats lstats = {};
 
-    lstats.LQ_serial = txstats.GetLQ_serial(); // = LQ_valid_received; // number of valid packets received on transmitter side
+    lstats.LQ_serial = stats.GetLQ_serial(); // = LQ_valid_received; // number of valid packets received on transmitter side
     lstats.rssi1_instantaneous = stats.last_rssi1;
     lstats.rssi2_instantaneous = stats.last_rssi2;
     lstats.snr_instantaneous = stats.GetLastSnr();
     lstats.receive_antenna = stats.last_antenna;
     lstats.transmit_antenna = stats.last_transmit_antenna;
-    lstats._diversity = 0; // pretty useless, so deprecated
-    lstats.rx1_valid = txstats.rx1_valid;
-    lstats.rx2_valid = txstats.rx2_valid;
+    lstats.rx1_valid = stats.rx1_valid;
+    lstats.rx2_valid = stats.rx2_valid;
 
-    lstats.rssi1_filtered = RSSI_INVALID;
-    lstats.rssi2_filtered = RSSI_INVALID;
-    lstats.snr_filtered = SNR_INVALID;
+    lstats.rssi_instantaneous_percent = crsf_cvt_rssi_percent(stats.GetLastRssi(), sx.ReceiverSensitivity_dbm());
 
     // receiver side of things
 
@@ -538,9 +536,8 @@ tMBridgeLinkStats lstats = {};
     lstats.receiver_rssi_instantaneous = stats.received_rssi;
     lstats.receiver_receive_antenna = stats.received_antenna;
     lstats.receiver_transmit_antenna = stats.received_transmit_antenna;
-    lstats._receiver_diversity = 0; // pretty useless, so deprecated
 
-    lstats.receiver_rssi_filtered = RSSI_INVALID;
+    lstats.receiver_rssi_instantaneous_percent = crsf_cvt_rssi_percent(stats.received_rssi, sx.ReceiverSensitivity_dbm());
 
     // further stats acquired on transmitter side
 
@@ -551,9 +548,10 @@ tMBridgeLinkStats lstats = {};
     lstats.LQ_fresh_serial_packets_received = stats.serial_data_received.GetLQ();
     lstats.bytes_per_sec_received = stats.GetReceiveBandwidthUsage();
 
-    lstats._LQ_received = stats.frames_received.GetLQ(); // number of packets received per sec, not practically relevant
+    //lstats.__LQ_received = stats.frames_received.GetLQ(); // number of packets received per sec, pretty useless, so deprecated
+    lstats.mavlink_packet_LQ_received = stats.GetMavlinkLQ();
 
-    lstats.fhss_curr_i = txstats.fhss_curr_i;
+    lstats.fhss_curr_i = stats.fhss_curr_i;
     lstats.fhss_cnt = fhss.Cnt();
 
     lstats.vehicle_state = mavlink_vehicle_state(); // 3 = invalid
@@ -654,7 +652,7 @@ void mbridge_start_ParamRequestList(void)
 void mbridge_send_ParamItem(void)
 {
     if (param_idx >= SETUP_PARAMETER_NUM) {
-        // we send a mbridge message, but don't put a MBRIDGE_CMD_PARAM_ITEM into the fifo, this stops it
+        // we send a mBridge message, but don't put a MBRIDGE_CMD_PARAM_ITEM into the fifo, this stops it
         tMBridgeParamItem item = {};
         item.index = UINT8_MAX; // indicates end of list
         mbridge.SendCommand(MBRIDGE_CMD_PARAM_ITEM, (uint8_t*)&item);

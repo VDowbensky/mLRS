@@ -32,7 +32,7 @@ uint16_t CLOCK_PERIOD_10US; // does not change while isr is enabled, so no need 
 // Rx Clock Class
 //-------------------------------------------------------
 
-class RxClockBase
+class tRxClock
 {
   public:
     void Init(uint16_t period_ms);
@@ -41,12 +41,10 @@ class RxClockBase
 
     void init_isr_off(void);
     void enable_isr(void);
-
-    uint16_t tim_10us(void);
 };
 
 
-void RxClockBase::Init(uint16_t period_ms)
+void tRxClock::Init(uint16_t period_ms)
 {
     CLOCK_PERIOD_10US = period_ms * 100; // frame rate in units of 10us
     doPostReceive = false;
@@ -56,13 +54,13 @@ void RxClockBase::Init(uint16_t period_ms)
 }
 
 
-void RxClockBase::SetPeriod(uint16_t period_ms)
+void tRxClock::SetPeriod(uint16_t period_ms)
 {
     CLOCK_PERIOD_10US = period_ms * 100;
 }
 
 
-void RxClockBase::Reset(void)
+void tRxClock::Reset(void)
 {
     if (!CLOCK_PERIOD_10US) while (1) {}
 
@@ -76,7 +74,7 @@ void RxClockBase::Reset(void)
 }
 
 
-void RxClockBase::init_isr_off(void)
+void tRxClock::init_isr_off(void)
 {
     tim_init_up(CLOCK_TIMx, 0xFFFFFFFF, TIMER_BASE_10US); // works for both 16 and 32 bit timer
 
@@ -91,14 +89,14 @@ void RxClockBase::init_isr_off(void)
 }
 
 
-void RxClockBase::enable_isr(void)
+void tRxClock::enable_isr(void)
 {
     LL_TIM_EnableIT_CC1(CLOCK_TIMx);
     LL_TIM_EnableIT_CC3(CLOCK_TIMx);
 }
 
 
-uint16_t RxClockBase::tim_10us(void)
+uint16_t rxclock_tim_10us(void) // just a helper which is sometimes useful, e.g. for dev-ing
 {
     return CLOCK_TIMx->CNT; // return 16 bit even for 32 bit timer
 }

@@ -20,16 +20,22 @@
 
 
 extern volatile uint32_t millis32(void);
-static inline bool connected(void);
+extern bool connected(void);
+extern tStats stats;
 
 
-#define RADIO_LINK_SYSTEM_ID        51 // SiK uses 51, 68
-#define GCS_SYSTEM_ID               255 // default of MissionPlanner, QGC
-#define REBOOT_SHUTDOWN_MAGIC       1234321
+#define RADIO_LINK_SYSTEM_ID          51 // SiK uses 51, 68
+#define GCS_SYSTEM_ID                 255 // default of MissionPlanner, QGC
+#define REBOOT_SHUTDOWN_MAGIC         1234321
+#if defined ESP8266 || defined ESP32
+  #define REBOOT_SHUTDOWN_MAGIC_ACK   (REBOOT_SHUTDOWN_MAGIC + 1) // to indicate ESP
+#else
+  #define REBOOT_SHUTDOWN_MAGIC_ACK   REBOOT_SHUTDOWN_MAGIC
+#endif
 
-#define MAVLINK_BUF_SIZE            300 // needs to be larger than max mavlink frame size = 280 bytes
+#define MAVLINK_BUF_SIZE              300 // needs to be larger than max MAVLink frame size = 280 bytes
 
-#define MAVLINK_OPT_FAKE_PARAMFTP   2 // 0: off, 1: always, 2: determined from mode & baudrate
+#define MAVLINK_OPT_FAKE_PARAMFTP     2 // 0: off, 1: always, 2: determined from mode & baudrate
 
 
 class tRxMavlink
@@ -69,7 +75,7 @@ class tRxMavlink
     fmav_status_t status_serial_in;
     uint8_t buf_serial_in[MAVLINK_BUF_SIZE]; // buffer for serial in parser
     fmav_message_t msg_link_out; // could be avoided by more efficient coding, is used only momentarily/locally
-    FifoBase<char,512> fifo_link_out; // needs to be at least 82 + 280
+    tFifo<char,512> fifo_link_out; // needs to be at least 82 + 280
     uint32_t bytes_parser_in; // bytes in the parser
 #endif
 
@@ -79,7 +85,7 @@ class tRxMavlink
     uint8_t radio_status_txbuf;
 
     uint32_t bytes_link_out_cnt; // for rate filter
-    LPFilterRate bytes_link_out_rate_filt;
+    tLpFilterRate bytes_link_out_rate_filt;
 
     typedef enum {
         TXBUF_STATE_NORMAL = 0,
@@ -107,7 +113,7 @@ class tRxMavlink
         uint32_t texe_ms;
     } cmd_ack;
 
-    void handle_cmd_long(void);
+    void handle_msg(fmav_message_t* msg); // handle messages from the fc
     void generate_cmd_ack(void);
 
     uint8_t _buf[MAVLINK_BUF_SIZE]; // temporary working buffer, to not burden stack
@@ -219,7 +225,7 @@ void tRxMavlink::Do(void)
 
                 uint16_t len;
                 if (Setup.Rx.SerialLinkMode == SERIAL_LINK_MODE_MAVLINK_X) {
-                    len = fmavX_msg_to_frame_buf(_buf, &msg_link_out); // X frame now in _buf
+                    len = fmavX_msg_to_frame_bufX(_buf, &msg_link_out); // X frame now in _buf
                 } else {
                     len = fmav_msg_to_frame_buf(_buf, &msg_link_out);
                 }
@@ -227,9 +233,7 @@ void tRxMavlink::Do(void)
                 fifo_link_out.PutBuf(_buf, len);
                 bytes_parser_in = 0;
 
-                if (msg_link_out.msgid == FASTMAVLINK_MSG_ID_COMMAND_LONG) {
-                    handle_cmd_long();
-                }
+                handle_msg(&msg_link_out);
 
                 break; // give the loop a chance before handling a further message
             }
@@ -336,7 +340,7 @@ void tRxMavlink::putc(char c)
     fmav_result_t result;
 #ifdef USE_FEATURE_MAVLINKX
     if (Setup.Rx.SerialLinkMode == SERIAL_LINK_MODE_MAVLINK_X) {
-        fmavX_parse_and_check_to_frame_buf(&result, buf_link_in, &status_link_in, c);
+        fmavX_parse_and_checkX_to_frame_buf(&result, buf_link_in, &status_link_in, c);
     } else {
         fmav_parse_and_check_to_frame_buf(&result, buf_link_in, &status_link_in, c);
     }
@@ -347,29 +351,30 @@ void tRxMavlink::putc(char c)
         fmav_frame_buf_to_msg(&msg_serial_out, &result, buf_link_in); // requires RESULT_OK
 
 #if MAVLINK_OPT_FAKE_PARAMFTP > 0
-#if MAVLINK_OPT_FAKE_PARAMFTP > 1
-        bool force_param_list = true;
-        switch (Config.Mode) {
-        case MODE_FLRC_111HZ: force_param_list = (Config.SerialBaudrate > 230400); break; // 230400 bps and lower is ok for mftp
-        case MODE_50HZ:
-        case MODE_FSK_50HZ: force_param_list = (Config.SerialBaudrate > 57600); break; // 57600 bps and lower is ok for mftp
-        case MODE_31HZ: force_param_list = (Config.SerialBaudrate > 57600); break; // 57600 bps and lower is ok for mftp
-        case MODE_19HZ: force_param_list = (Config.SerialBaudrate > 38400); break; // 38400 bps and lower is ok for mftp
-        }
-        if (force_param_list)
-#endif
         // if it's a mavftp call to @PARAM/param.pck we fake the url
         // this will make ArduPilot to response with a NACK:FileNotFound
         // which will make MissionPlanner (any GCS?) to fallback to normal parameter upload
         if (msg_serial_out.msgid == FASTMAVLINK_MSG_ID_FILE_TRANSFER_PROTOCOL) {
-            uint8_t target_component = msg_serial_out.payload[2];
-            uint8_t opcode = msg_serial_out.payload[6];
-            char* url = (char*)(msg_serial_out.payload + 15);
-            if (((target_component == MAV_COMP_ID_AUTOPILOT1) || (target_component == MAV_COMP_ID_ALL)) &&
-                (opcode == MAVFTP_OPCODE_OpenFileRO)) {
-                if (!strncmp(url, "@PARAM/param.pck", 16)) {
-                    url[1] = url[7] = url[13] = 'x'; // now fake it to "@xARAM/xaram.xck"
-                    fmav_msg_recalculate_crc(&msg_serial_out); // we need to recalculate CRC, requires RESULT_OK
+            bool force_param_list = true;
+#if MAVLINK_OPT_FAKE_PARAMFTP > 1
+            switch (Config.Mode) {
+            case MODE_FLRC_111HZ: force_param_list = (Config.SerialBaudrate > 230400); break; // 230400 bps and lower is ok for mftp
+            case MODE_50HZ:
+            case MODE_FSK_50HZ: force_param_list = (Config.SerialBaudrate > 115200); break; // 115200 bps and lower is ok for mftp
+            case MODE_31HZ: force_param_list = (Config.SerialBaudrate > 57600); break; // 57600 bps and lower is ok for mftp
+            case MODE_19HZ: force_param_list = (Config.SerialBaudrate > 38400); break; // 38400 bps and lower is ok for mftp
+            }
+#endif
+            if (force_param_list) {
+                uint8_t target_component = msg_serial_out.payload[2];
+                uint8_t opcode = msg_serial_out.payload[6];
+                char* url = (char*)(msg_serial_out.payload + 15);
+                if (((target_component == MAV_COMP_ID_AUTOPILOT1) || (target_component == MAV_COMP_ID_ALL)) &&
+                    (opcode == MAVFTP_OPCODE_OpenFileRO)) {
+                    if (!strncmp(url, "@PARAM/param.pck", 16)) {
+                        url[1] = url[7] = url[13] = 'x'; // now fake it to "@xARAM/xaram.xck"
+                        fmav_msg_recalculate_crc(&msg_serial_out); // we need to recalculate CRC, requires RESULT_OK
+                    }
                 }
             }
         }
@@ -485,9 +490,22 @@ bool tRxMavlink::handle_txbuf_ardupilot(uint32_t tnow_ms)
 
     // method C, with improvements
     // assumes 1 sec delta time
-    uint32_t rate_max = ((uint32_t)1000 * FRAME_RX_PAYLOAD_LEN) / Config.frame_rate_ms; // theoretical rate, bytes per sec
+    // was uint32_t rate_max = ((uint32_t)1000 * FRAME_RX_PAYLOAD_LEN) / Config.frame_rate_ms; // theoretical rate, bytes per sec
+    int32_t frame_cnt_filtered = stats.GetFrameCnt();
+    static int32_t frame_cnt = 0;
+    static int32_t hysteresis = 10;
+    if ((frame_cnt_filtered - frame_cnt) < -hysteresis || (frame_cnt_filtered - frame_cnt) > hysteresis) {
+        frame_cnt = frame_cnt_filtered;
+        hysteresis = 10;
+    } else if (hysteresis > 0) {
+        hysteresis--;
+    }
+    if (frame_cnt < 500) frame_cnt = 500;
+    uint32_t rate_max = (frame_cnt * FRAME_RX_PAYLOAD_LEN) / Config.frame_rate_ms; // theoretical rate, bytes per sec
     uint32_t rate_percentage = (bytes_link_out * 100) / rate_max;
-
+#if 0 // debug
+dbg.puts("\nMa: ");dbg.puts(u16toBCD_s(frame_cnt_filtered));dbg.puts(" , ");dbg.puts(u16toBCD_s(frame_cnt));
+#endif
     // https://github.com/ArduPilot/ardupilot/blob/fa6441544639bd5dc84c3e6e3d2f7bfd2aecf96d/libraries/GCS_MAVLink/GCS_Common.cpp#L782-L801
     // aim at 75%..85% rate usage in steady state
     if (rate_percentage > 95) {
@@ -515,7 +533,7 @@ bool tRxMavlink::handle_txbuf_ardupilot(uint32_t tnow_ms)
 
     // only for "educational" purposes currently
     bytes_link_out_rate_filt.Update(tnow_ms, bytes_link_out_cnt, 1000);
-#if 0 // Debug
+#if 0 // debug
 static uint32_t t_last = 0;
 uint32_t t = millis32(), dt = t - t_last; t_last = t;
 dbg.puts("\nMa: ");
@@ -650,9 +668,9 @@ if(txbuf<25) dbg.puts("*0.8 "); else
 if(txbuf<35) dbg.puts("*0.975 "); else
 if(txbuf>50) dbg.puts("*1.025 "); else dbg.puts("*1 ");
 #endif
-    // increase rate faster after transient traffic since PX4 currently has no fast recovery. Could also try 100ms
+    // increase rate faster after transient traffic since PX4 currently has no fast recovery. Could also try 100 ms
     if ((txbuf_state == TXBUF_STATE_NORMAL) && (txbuf == 100)) {
-        radio_status_tlast_ms -= 800; // do again in 200ms
+        radio_status_tlast_ms -= 800; // do again in 200 ms
         bytes_link_out = (bytes_link_out * 4)/5; // rolling average
     } else {
         bytes_link_out = 0; // reset, to restart rate measurement
@@ -780,8 +798,8 @@ int8_t rx_snr1, rx_snr2;
         flags,
 
         // rx stats
-        rxstats.GetLQ_rc(), // uint8_t rx_LQ_rc
-        rxstats.GetLQ_serial(), // uint8_t rx_LQ_ser
+        stats.GetLQ_rc(), // uint8_t rx_LQ_rc
+        stats.GetLQ_serial(), // uint8_t rx_LQ_ser
         rx_rssi1, // uint8_t rx_rssi1
         rx_snr1, // int8_t rx_snr1
         rx_rssi2, // uint8_t rx_rssi2
@@ -863,13 +881,18 @@ void tRxMavlink::generate_radio_link_information(void)
 
 void tRxMavlink::generate_cmd_ack(void)
 {
+    uint8_t result = MAV_RESULT_ACCEPTED;
+    if (cmd_ack.command == MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN) {
+        if (!serial.has_systemboot()) result = MAV_RESULT_DENIED;
+    }
+
     fmav_msg_command_ack_pack(
         &msg_serial_out,
         RADIO_LINK_SYSTEM_ID, MAV_COMP_ID_TELEMETRY_RADIO,
         cmd_ack.command,
-        (cmd_ack.state) ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED, // result
+        result, // result
         cmd_ack.state, // progress
-        REBOOT_SHUTDOWN_MAGIC, // result_param2, set it to magic value
+        REBOOT_SHUTDOWN_MAGIC_ACK, // result_param2, set it to magic value
         cmd_ack.cmd_src_sysid,
         cmd_ack.cmd_src_compid,
         //uint16_t command, uint8_t result, uint8_t progress, int32_t result_param2,
@@ -878,12 +901,15 @@ void tRxMavlink::generate_cmd_ack(void)
 }
 
 
-void tRxMavlink::handle_cmd_long(void)
+// handle messages from the fc
+void tRxMavlink::handle_msg(fmav_message_t* msg)
 {
 #ifdef USE_FEATURE_MAVLINKX
 fmav_command_long_t payload;
 
-    fmav_msg_command_long_decode(&payload, &msg_link_out);
+    if (msg->msgid != FASTMAVLINK_MSG_ID_COMMAND_LONG) return;
+
+    fmav_msg_command_long_decode(&payload, msg);
 
     // check if it is for us, only allow targeted commands
     if (payload.target_system != RADIO_LINK_SYSTEM_ID) return;
@@ -901,12 +927,13 @@ fmav_command_long_t payload;
 
     inject_cmd_ack = true;
     cmd_ack.command = payload.command;
-    cmd_ack.cmd_src_sysid = msg_link_out.sysid;
-    cmd_ack.cmd_src_compid = msg_link_out.compid;
+    cmd_ack.cmd_src_sysid = msg->sysid;
+    cmd_ack.cmd_src_compid = msg->compid;
 
     bool cmd_valid = false;
     switch (payload.command) {
         case MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN:
+            if (!serial.has_systemboot()) break; // can't do uart flashing on this serial
             cmd_valid = (payload.param3 == 3.0f &&
                          payload.param4 == MAV_COMP_ID_TELEMETRY_RADIO &&
                          payload.param7 == (float)REBOOT_SHUTDOWN_MAGIC);

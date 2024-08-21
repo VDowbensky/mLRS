@@ -11,15 +11,17 @@
 #pragma once
 
 
+extern bool connected_and_rx_setup_available(void);
+
+
 class tTxSxSerial : public tSerialBase
 {
   public:
     void Init(tSerialBase* _serialport, tSerialBase* _mbridge, tSerialBase* _serial2port);
-    bool IsEnabled(void);
 
     bool available(void) override;
     char getc(void) override;
-    void putc(char c) override;
+    void putbuf(uint8_t* buf, uint16_t len) override;
     void flush(void) override;
 
   private:
@@ -48,18 +50,12 @@ void tTxSxSerial::Init(tSerialBase* _serialport, tSerialBase* _mbridge, tSerialB
 }
 
 
-bool tTxSxSerial::IsEnabled(void)
-{
-    return true;
-}
-
-
 bool tTxSxSerial::available(void)
 {
     if (!connected_and_rx_setup_available()) return 0;
 
     if (SERIAL_LINK_MODE_IS_MAVLINK(Setup.Rx.SerialLinkMode)) {
-        return mavlink.available(); // get from serial via mavlink parser
+        return mavlink.available(); // get from serial via MAVLink parser
     }
     return ser->available(); // get from serial
 }
@@ -70,27 +66,27 @@ char tTxSxSerial::getc(void)
     if (!connected_and_rx_setup_available()) return 0;
 
     if (SERIAL_LINK_MODE_IS_MAVLINK(Setup.Rx.SerialLinkMode)) {
-        return mavlink.getc(); // get from serial via mavlink parser
+        return mavlink.getc(); // get from serial via MAVLink parser
     }
     return ser->getc(); // get from serial
 }
 
 
-void tTxSxSerial::putc(char c)
+void tTxSxSerial::putbuf(uint8_t* buf, uint16_t len)
 {
     if (!connected_and_rx_setup_available()) return;
 
     if (SERIAL_LINK_MODE_IS_MAVLINK(Setup.Rx.SerialLinkMode)) { // this has to go via the parser
-        mavlink.putc(c);
+        for (uint16_t i = 0; i < len; i++) mavlink.putc(buf[i]);
         return;
     }
-    ser->putc(c);
+    ser->putbuf(buf, len);
 }
 
 
 void tTxSxSerial::flush(void)
 {
-    mavlink.flush(); // we don't distinguish here, can't harm to always flush mavlink handler
+    mavlink.flush(); // we don't distinguish here, can't harm to always flush MAVLink handler
     ser->flush();
 }
 

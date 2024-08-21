@@ -31,6 +31,47 @@ The default selection of frequency bands can be overruled by feature defines.
 #include "../common_conf.h"
 
 
+//-- MATEKSYS mLRS devices
+
+#ifdef RX_MATEK_MR24_30_G431KB
+  #define DEVICE_NAME "Matek mR24-30"
+  #define DEVICE_IS_RECEIVER
+  #define DEVICE_HAS_SX128x
+  #define FREQUENCY_BAND_2P4_GHZ
+#endif
+
+#ifdef TX_MATEK_MR24_30_G431KB
+  #define DEVICE_NAME "Matek mR24-30"
+  #define DEVICE_IS_TRANSMITTER
+  #define DEVICE_HAS_SX128x
+  #define FREQUENCY_BAND_2P4_GHZ
+#endif
+
+#ifdef RX_MATEK_MR900_30_G431KB
+  #define DEVICE_NAME "Matek mR900-30"
+  #define DEVICE_IS_RECEIVER
+  #define DEVICE_HAS_SX126x
+  #define FREQUENCY_BAND_868_MHZ
+  #define FREQUENCY_BAND_915_MHZ_FCC
+#endif
+
+#ifdef TX_MATEK_MR900_30_G431KB
+  #define DEVICE_NAME "Matek mR900-30"
+  #define DEVICE_IS_TRANSMITTER
+  #define DEVICE_HAS_SX126x
+  #define FREQUENCY_BAND_868_MHZ
+  #define FREQUENCY_BAND_915_MHZ_FCC
+#endif
+
+#ifdef RX_MATEK_MR900_22_WLE5CC
+  #define DEVICE_NAME "Matek mR900-22"
+  #define DEVICE_IS_RECEIVER
+  #define DEVICE_HAS_SX126x
+  #define FREQUENCY_BAND_868_MHZ
+  #define FREQUENCY_BAND_915_MHZ_FCC
+#endif
+
+
 //-- FrsKy R9 system
 
 #ifdef RX_R9MX_868_L433CB
@@ -335,65 +376,8 @@ The default selection of frequency bands can be overruled by feature defines.
 // ESP Boards
 //-------------------------------------------------------
 
-//-- ELRS 868/915 MHz Generic Devices
-
-#ifdef RX_ELRS_GENERIC_900_ESP8285
-  #define DEVICE_NAME "GENERIC 900"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX127x
-  #define FREQUENCY_BAND_868_MHZ
-  #define FREQUENCY_BAND_915_MHZ_FCC
-#endif
-
-#ifdef RX_ELRS_GENERIC_900_PA_ESP8285
-  #define DEVICE_NAME "GENERIC 900 PA"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX127x
-  #define FREQUENCY_BAND_868_MHZ
-  #define FREQUENCY_BAND_915_MHZ_FCC
-#endif
-
-//-- ELRS 2.4 GHz Generic Devices
-
-#ifdef RX_ELRS_GENERIC_2400_ESP8285
-  #define DEVICE_NAME "GENERIC 2400"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX128x
-  #define FREQUENCY_BAND_2P4_GHZ
-#endif
-
-#ifdef RX_ELRS_GENERIC_2400_PA_ESP8285
-  #define DEVICE_NAME "GENERIC 2400 PA"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX128x
-  #define FREQUENCY_BAND_2P4_GHZ
-#endif
-
-//-- ELRS Selected Devices
-
-#ifdef RX_ELRS_BAYCK_NANO_PRO_900_ESP8285
-  #define DEVICE_NAME "BAYCK NANO PRO 900"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX127x
-  #define FREQUENCY_BAND_868_MHZ
-  #define FREQUENCY_BAND_915_MHZ_FCC
-#endif
-
-#ifdef RX_ELRS_SPEEDYBEE_NANO_2400_ESP8285
-  #define DEVICE_NAME "SPEEDYBEE NANO 2.4G"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX128x
-  #define FREQUENCY_BAND_2P4_GHZ
-#endif
-
-// -- DIY
-
-#ifdef RX_DIYBOARD_900_ESP8266
-  #define DEVICE_NAME "DIY BOARD 900"
-  #define DEVICE_IS_RECEIVER
-  #define DEVICE_HAS_SX127x
-  #define FREQUENCY_BAND_868_MHZ
-  #define FREQUENCY_BAND_915_MHZ_FCC
+#if defined ESP8266 || defined ESP32
+#include "esp/esp-device_conf.h"
 #endif
 
 
@@ -438,4 +422,10 @@ The default selection of frequency bands can be overruled by feature defines.
 #define USE_FEATURE_FLRC
 #if defined TX_FRM303_F072CB || defined RX_FRM303_F072CB // is short of RAM for tx, and possibly too slow
   #undef USE_FEATURE_FLRC
+#endif
+
+
+#define USE_FEATURE_MAVLINK_COMPONENT
+#ifndef USE_FEATURE_MAVLINKX
+  #undef USE_FEATURE_MAVLINK_COMPONENT
 #endif

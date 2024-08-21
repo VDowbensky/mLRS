@@ -12,6 +12,7 @@ Notation:
 - 'part' refers to the STM32 chip family and version. Example: STM32G431KB.
 - 'target' refers to the code folder specific for the board/device. Example: tx-diy-E22-g431kb. The target thus also implies a specific part.
 
+It is assumed that the build environment for mLRS was set up as described in [Software: Installation Bits and Bops](https://github.com/olliw42/mLRS#software-installation-bits-and-bops).
 
 ## I. Create Target: Cube MX
 
@@ -52,12 +53,12 @@ This opens the STM32CubeMX "Pinout & Configuration" page (inside STM32CubeIDE).
   - -> System Core -> SYS -> Debug: select "Serial Wire"
   - -> System Core -> RCC -> High Speed Clock (HSE): select "Crystal/Ceramic Resonator"
 
-- STM32WLE5CC in E77 module
+- STM32WLE5CC in "old" E77 module (E77 module with xtal, not TCXO)
   - -> System Core -> SYS -> Timebase Source: select "SysTick"
   - -> System Core -> RCC -> High Speed Clock (HSE): select "Crystal/Ceramic Resonator"
   - -> Trace and Debug -> DEBUG -> JTAG and Trace: select "Serial Wire"
 
-- STM32WLE5JC in WioE5 module
+- STM32WLE5JC in WioE5 module or STM32WLE5CC in "new" E77 module (E77 module with TCXO)
   - -> System Core -> SYS -> Timebase Source: select "SysTick"
   - -> System Core -> RCC -> High Speed Clock (HSE): select "TCXO"
   - -> Trace and Debug -> DEBUG -> JTAG and Trace: select "Serial Wire"
@@ -150,7 +151,7 @@ This starts the compiler. Let it run, don't worry about the errors which result.
 
 ### 11. Right-mouse click on newly created target (e.g. "tx-diy-e22-g431kb") -> New -> Folder
 
-This opens the "New Folder/Folder" dialog.
+This opens the "New Folder" dialog.
 
 -> Advanced -> check "Link to alternate folder (Linked Folder)"
 -> hit "Browse"

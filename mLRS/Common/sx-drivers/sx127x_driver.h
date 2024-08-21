@@ -50,7 +50,7 @@ void sx1276_rfpower_calc(const int8_t power_dbm, uint8_t* sx_power, int8_t* actu
 {
 #ifdef SX_USE_RFO
     // Pout = OutputPower if PaSelect = 0 (RFO pin)
-    int16_t power_sx = (int16_t)power_dbm - GAIN_DBM;
+    int16_t power_sx = (int16_t)power_dbm - GAIN_DBM + 3;
 #else
     // Pout = 17 - (15 - OutputPower) if PaSelect = 1 (PA_BOOST pin)
     int16_t power_sx = (int16_t)power_dbm - GAIN_DBM - 2;
@@ -63,7 +63,7 @@ void sx1276_rfpower_calc(const int8_t power_dbm, uint8_t* sx_power, int8_t* actu
     *sx_power = power_sx;
 
 #ifdef SX_USE_RFO
-    *actual_power_dbm = power_sx + GAIN_DBM;
+    *actual_power_dbm = power_sx + GAIN_DBM - 3;
 #else
     *actual_power_dbm = power_sx + GAIN_DBM + 2;
 #endif
@@ -123,7 +123,8 @@ class Sx127xDriverCommon : public Sx127xDriverBase
         // 5 OcpOn, 4-0 OcpTrim
         ReadWriteRegister(SX1276_REG_Ocp, 0x3F, SX1276_OCP_ON | SX1276_OCP_TRIM_150_MA);
 #ifdef SX_USE_RFO
-        SetPowerParams(SX1276_PA_SELECT_RFO, SX1276_MAX_POWER_15_DBM, sx_power, SX1276_PA_RAMP_40_US);
+        // was SX1276_MAX_POWER_15_DBM before
+        SetPowerParams(SX1276_PA_SELECT_RFO, SX1276_MAX_POWER_11p4_DBM, sx_power, SX1276_PA_RAMP_40_US);
 #else
         SetPowerParams(SX1276_PA_SELECT_PA_BOOST, SX1276_MAX_POWER_15_DBM, sx_power, SX1276_PA_RAMP_40_US);
 #endif
@@ -429,9 +430,144 @@ class Sx127xDriver : public Sx127xDriverCommon
 //-------------------------------------------------------
 // Driver for SX2
 //-------------------------------------------------------
-#ifdef DEVICE_HAS_DIVERSITY
-  #error Diversity not yet supported for SX127x!
+#if defined DEVICE_HAS_DIVERSITY || defined DEVICE_HAS_DIVERSITY_SINGLE_SPI
+
+#ifndef SX2_RESET
+  #error SX2 must have a RESET pin!
 #endif
+
+// map the irq bits
+typedef enum {
+    SX2_IRQ_TX_DONE = SX1276_IRQ_TX_DONE,
+    SX2_IRQ_RX_DONE = SX1276_IRQ_RX_DONE,
+    SX2_IRQ_TIMEOUT = SX1276_IRQ_RX_TIMEOUT,
+    SX2_IRQ_ALL     = SX1276_IRQ_ALL,
+} SX2_IRQ_ENUM;
+
+
+class Sx127xDriver2 : public Sx127xDriverCommon
+{
+  public:
+
+    void SpiSelect(void) override
+    {
+        spib_select();
+        delay_ns(50); // datasheet says t1 = 25 ns, semtech driver doesn't do it, helps so do it
+    }
+
+    void SpiDeselect(void) override
+    {
+        delay_ns(50); // datasheet says t8 = 25 ns, semtech driver doesn't do it, helps so do it
+        spib_deselect();
+    }
+
+#ifndef DEVICE_HAS_DIVERSITY_SINGLE_SPI
+    void SpiTransfer(uint8_t* dataout, uint8_t* datain, uint8_t len) override
+    {
+        spib_transfer(dataout, datain, len);
+    }
+
+    void SpiRead(uint8_t* datain, uint8_t len) override
+    {
+        spib_read(datain, len);
+    }
+
+    void SpiWrite(uint8_t* dataout, uint8_t len) override
+    {
+        spib_write(dataout, len);
+    }
+#else
+    void SpiTransfer(uint8_t* dataout, uint8_t* datain, uint8_t len) override
+    {
+        spi_transfer(dataout, datain, len);
+    }
+
+    void SpiRead(uint8_t* datain, uint8_t len) override
+    {
+        spi_read(datain, len);
+    }
+
+    void SpiWrite(uint8_t* dataout, uint8_t len) override
+    {
+        spi_write(dataout, len);
+    }
+#endif
+
+ //-- RF power interface
+
+    void RfPowerCalc(int8_t power_dbm, uint8_t* sx_power, int8_t* actual_power_dbm) override
+    {
+#if defined DEVICE_HAS_I2C_DAC || defined DEVICE_HAS_INTERNAL_DAC_TWOCHANNELS
+        rfpower_calc(power_dbm, sx_power, actual_power_dbm, &dac);
+#else
+        sx1276_rfpower_calc(power_dbm, sx_power, actual_power_dbm, POWER_GAIN_DBM, POWER_SX1276_MAX_DBM);
+#endif
+    }
+
+    //-- init API functions
+
+    void _reset(void)
+    {
+        gpio_low(SX2_RESET);
+        delay_ms(5); // datasheet says > 100 us
+        gpio_high(SX2_RESET);
+        delay_ms(50); // datasheet says 5 ms
+    }
+
+    void Init(void)
+    {
+        Sx127xDriverCommon::Init();
+
+#ifndef DEVICE_HAS_DIVERSITY_SINGLE_SPI
+        spib_init();
+        spib_setnop(0x00); // 0x00 = NOP
+#else
+        // spi init done already by driver1
+#endif
+        sx2_init_gpio();
+        sx2_dio_exti_isr_clearflag();
+        sx2_dio_init_exti_isroff();
+
+        // no idea how long the SX1276 takes to boot up, so give it some good time
+        delay_ms(300);
+        _reset(); // this is super crucial ! was so for SX1280, is it also for the SX1276 ??
+
+        // this is not nice, figure out where to place
+#if defined DEVICE_HAS_I2C_DAC || defined DEVICE_HAS_INTERNAL_DAC_TWOCHANNELS
+        dac.Init();
+#endif
+
+        SetStandby(); // should be in STDBY after reset
+        delay_us(1000); // is this needed ????
+    }
+
+    //-- high level API functions
+
+    void StartUp(tSxGlobalConfig* global_config)
+    {
+        Configure(global_config);
+        delay_us(125); // may not be needed
+        sx2_dio_enable_exti_isr();
+    }
+
+    //-- this are the API functions used in the loop
+
+    void SendFrame(uint8_t* data, uint8_t len, uint16_t tmo_ms = 0)
+    {
+        sx2_amp_transmit();
+        Sx127xDriverCommon::SendFrame(data, len, tmo_ms);
+        delay_us(125); // may not be needed if busy available
+    }
+
+    void SetToRx(uint16_t tmo_ms = 0)
+    {
+        sx2_amp_receive();
+        Sx127xDriverCommon::SetToRx(tmo_ms);
+        delay_us(125); // may not be needed if busy available
+    }
+};
+
+#endif // defined DEVICE_HAS_DIVERSITY || defined DEVICE_HAS_DIVERSITY_SINGLE_SPI
 
 
 #endif // SX1276_DRIVER_H

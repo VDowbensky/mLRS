@@ -11,8 +11,8 @@
 #pragma once
 
 
-#define VERSION             10201 // leading zero makes it octal!
-#define VERSIONONLYSTR      "v1.2.01"
+#define VERSION             10301 // leading zero makes it octal!
+#define VERSIONONLYSTR      "v1.3.01"
 #define SETUPLAYOUT         335 // this should be changed then Setup struct and/or serial changes
 
 
@@ -49,7 +49,7 @@
 
 #define SETUP_TX_CHANNELS_SOURCE        1 // 0: none, 1: Crsf (pin5), 2: In (In or pin1), 3: mBridge (pin5)
 
-#define SETUP_TX_CHANNEL_ORDER          CHANNEL_ORDER_ETAR
+#define SETUP_TX_CHANNEL_ORDER          CHANNEL_ORDER_AETR
 
 #define SETUP_TX_IN_MODE                0 // 0: IN_CONFIG_SBUS, 1: IN_CONFIG_SBUS_INVERTED
 
@@ -59,10 +59,11 @@
 
 #define SETUP_TX_DIVERSITY              DIVERSITY // 0: default, 1: ANTENNA 1 if diversity available, 2: ANTENNA 2 if diversity available
 
-#define SETUP_TX_SEND_RADIO_STATUS      0 // 0: off, 1: 1 Hz
+#define SETUP_TX_SEND_RADIO_STATUS      1 // 0: off, 1: 1 Hz
+#define SETUP_TX_MAV_COMPONENT          1 // 0: off, 1: enabled
 
 #define SETUP_TX_BUZZER                 0 // 0: off, 1: LP, 2: rxLQ
-#define SETUP_TX_CLI_LINE_END           0 // 0: CR, 1: LF, 2: CRLF
+#define SETUP_TX_CLI_LINE_END           0 // 0: CRLF, 1: LF, 2: CR
 
 
 #define SETUP_RX_CHANNEL_ORDER          CHANNEL_ORDER_AETR
@@ -77,15 +78,13 @@
 
 #define SETUP_RX_DIVERSITY              DIVERSITY // 0: default, 1: ANTENNA 1 if diversity available, 2: ANTENNA 2 if diversity available
 
-#define SETUP_RX_SERIAL_LINK_MODE       1 // 0: transparent, 1: mavlink, 2: mavlinkX
+#define SETUP_RX_SERIAL_LINK_MODE       2 // 0: transparent, 1: mavlink, 2: mavlinkX
 
 #define SETUP_RX_SEND_RADIO_STATUS      1 // 0: off, 1: ardu_1, 2: px4 aka "brad"
 #define SETUP_RX_SEND_RC_CHANNELS       0 // 0: off, 1: RC_CHANNEL_OVERRIDE, 2: RC_CHANNELS
 
 #define SETUP_RX_OUT_RSSI_CHANNEL       0 // 0: off, 5: CH5, 16: CH16
 #define SETUP_RX_OUT_LQ_CHANNEL         0 // 0: off, 5: CH5, 16: CH16
-
-#define SETUP_RX_BUZZER                 0 // 0: off, 1: LP
 
 
 #define BIND_PHRASE                     "mlrs.0" // string of 6 characters, allowed are 'a'-'z','0'-'9','_','-','#','.'

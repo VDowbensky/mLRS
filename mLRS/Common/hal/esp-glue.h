@@ -5,6 +5,10 @@
 //*******************************************************
 // ESP Glue
 //*******************************************************
+#ifndef ESP_GLUE_H
+#define ESP_GLUE_H
+#pragma once
+
 
 #include <Arduino.h>
 
@@ -19,14 +23,9 @@ void __disable_irq(void) {}
 void __enable_irq(void) {}
 
 
-void hal_init(void)
-{
-    // nothing to do
-}
-
 
 // setup(), loop() streamlining between Arduino/STM code
-uint8_t restart_controller = 0;
+static uint8_t restart_controller = 0;
 void setup() {}
 void main_loop(void);
 void loop() { main_loop(); }
@@ -44,4 +43,5 @@ void loop() { main_loop(); }
     return;
 
 
+#endif // ESP_GLUE_H
 

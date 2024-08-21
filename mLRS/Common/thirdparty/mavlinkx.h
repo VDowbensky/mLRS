@@ -129,7 +129,7 @@ typedef struct
 } fmavx_status_t;
 
 
-void fmavX_status_reset(fmavx_status_t* xstatus)
+void fmavX_status_reset(fmavx_status_t* const xstatus)
 {
     xstatus->flags = 0;
     xstatus->flags_ext = 0;
@@ -141,6 +141,7 @@ typedef struct
 {
     uint8_t compression_enabled;
 } fmavx_config_t;
+
 static fmavx_config_t fmavx_config_g = {}; // we use a global here
 
 
@@ -155,8 +156,8 @@ fmavx_status_t fmavx_status = {};
 
 
 #ifdef MAVLINKX_COMPRESSION
-uint8_t _fmavX_payload_compress(uint8_t* payload_out, uint8_t* len_out, uint8_t* payload, uint8_t len);
-void _fmavX_payload_decompress(uint8_t* payload_out, uint8_t* len_out, uint8_t len);
+uint8_t _fmavX_payload_compress(uint8_t* const payload_out, uint8_t* const len_out, const uint8_t* const payload, uint8_t len);
+void _fmavX_payload_decompress(uint8_t* const payload_out, uint8_t* const len_out, uint8_t len);
 #endif
 
 
@@ -167,7 +168,7 @@ void _fmavX_payload_decompress(uint8_t* payload_out, uint8_t* len_out, uint8_t l
 // call it once before using the library
 FASTMAVLINK_FUNCTION_DECORATOR void fmavX_init(void)
 {
-    memset(&fmavx_status, 0, sizeof(fmavx_status));
+    memset((uint8_t*)&fmavx_status, 0, sizeof(fmavx_status));
 
     fmavx_config_g.compression_enabled = 0; // disable it per default
 }
@@ -256,7 +257,7 @@ const uint8_t fmavx_crc8_table[256] = {
 };
 
 
-FASTMAVLINK_FUNCTION_DECORATOR void fmavX_crc8_accumulate(uint8_t* crc, uint8_t data)
+FASTMAVLINK_FUNCTION_DECORATOR void fmavX_crc8_accumulate(uint8_t* const crc, uint8_t data)
 {
     *crc = fmavx_crc8_table[*crc ^ data];
 }
@@ -277,7 +278,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_crc8_calculate(const uint8_t* buf, 
 
 #else
 
-FASTMAVLINK_FUNCTION_DECORATOR void fmavX_crc8_accumulate(uint8_t* crc, uint8_t data)
+FASTMAVLINK_FUNCTION_DECORATOR void fmavX_crc8_accumulate(uint8_t* const crc, uint8_t data)
 {
 uint8_t tmp1, tmp2;
 
@@ -302,13 +303,19 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_crc8_calculate(const uint8_t* buf, 
 #endif
 
 
+FASTMAVLINK_FUNCTION_DECORATOR void fmavX_crc8_init(uint8_t* crc)
+{
+    *crc = MAVLINKX_CRC8_INIT;
+}
+
+
 //-------------------------------------------------------
 // Converter
 //-------------------------------------------------------
 // convert fmav msg structure into fmavX packet
 // fmav_message_t has all info on the packet which we need, so it's quite straightforward to do
 
-FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmavX_msg_to_frame_buf(uint8_t* buf, fmav_message_t* msg)
+FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmavX_msg_to_frame_bufX(uint8_t* const buf, const fmav_message_t* const msg)
 {
     uint16_t pos = 0;
     uint8_t flags_ext = 0;
@@ -434,7 +441,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint16_t fmavX_msg_to_frame_buf(uint8_t* buf, fma
 // parse the fmavX stream into regular fmav frame_buf
 // returns NONE, HAS_HEADER, or OK
 
-FASTMAVLINK_FUNCTION_DECORATOR void _fmavX_parse_header_to_frame_buf(uint8_t* buf, fmav_status_t* status, uint8_t c)
+FASTMAVLINK_FUNCTION_DECORATOR void _fmavX_parse_headerX_to_frame_buf(uint8_t* const buf, fmav_status_t* const status, uint8_t c)
 {
     fmavx_status.header[fmavx_status.pos++] = c; // memorize
 
@@ -583,7 +590,7 @@ FASTMAVLINK_FUNCTION_DECORATOR void _fmavX_parse_header_to_frame_buf(uint8_t* bu
 }
 
 
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parse_to_frame_buf(fmav_result_t* result, uint8_t* buf, fmav_status_t* status, uint8_t c)
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parseX_to_frame_buf(fmav_result_t* const result, uint8_t* const buf, fmav_status_t* const status, uint8_t c)
 {
     if (status->rx_cnt >= MAVLINKX_FRAME_LEN_MAX) { // this should never happen, but play it safe
         status->rx_state = FASTMAVLINK_PARSE_STATE_IDLE;
@@ -613,7 +620,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parse_to_frame_buf(fmav_result_t* r
     case FASTMAVLINK_PARSE_STATE_MSGID_2:
     case FASTMAVLINK_PARSE_STATE_MSGID_3:
     case FASTMAVLINK_PARSE_STATE_CRC_EXTRA:
-        _fmavX_parse_header_to_frame_buf(buf, status, c);
+        _fmavX_parse_headerX_to_frame_buf(buf, status, c);
         result->res = FASTMAVLINK_PARSE_RESULT_NONE;
         return FASTMAVLINK_PARSE_RESULT_NONE;
 
@@ -642,7 +649,7 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parse_to_frame_buf(fmav_result_t* r
                 status->rx_state = FASTMAVLINK_PARSE_STATE_MAGIC_2;
 
                 for (uint8_t n = next_magic_pos + 1; n < len; n++) {
-                    _fmavX_parse_header_to_frame_buf(buf, status, head[n]);
+                    _fmavX_parse_headerX_to_frame_buf(buf, status, head[n]);
                 }
             }
 
@@ -696,11 +703,11 @@ FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parse_to_frame_buf(fmav_result_t* r
 
 // convenience wrapper
 // returns 0, or 1
-FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parse_and_check_to_frame_buf(fmav_result_t* result, uint8_t* buf, fmav_status_t* status, uint8_t c)
+FASTMAVLINK_FUNCTION_DECORATOR uint8_t fmavX_parse_and_checkX_to_frame_buf(fmav_result_t* const result, uint8_t* const buf, fmav_status_t* const status, uint8_t c)
 {
 uint8_t res;
 
-    res = fmavX_parse_to_frame_buf(result, buf, status, c);
+    res = fmavX_parseX_to_frame_buf(result, buf, status, c);
     // result can be NONE, HAS_HEADER, or OK
     if (res != FASTMAVLINK_PARSE_RESULT_OK) return 0;
 
@@ -723,7 +730,7 @@ Copyright (c) OlliW, OlliW42, www.olliw.eu
 For terms of use/license see above permission notice.
 
 The concept developed here is based on observations of the distribution of the bytes in the payload of
-mavlink messages. If the actual distribution is very different, the scheme becomes less effective, obviously.
+MAVLink messages. If the actual distribution is very different, the scheme becomes less effective, obviously.
 The observations are:
 - ca. 20% - 25% of the bytes in the payload are 0 (after trailing zero removal in v2)
 - ca. 3% - 4% of the bytes in the payload are 255
@@ -764,7 +771,7 @@ the last byte all to 1.
 // we can use payload_out buffer as working buffer
 
 // len_out & out_bit index the next bit position to write to
-void _fmavX_encode_put_bits(uint8_t* payload_out, uint8_t* len_out, uint16_t code, uint8_t code_bit_len)
+void _fmavX_encode_put_bits(uint8_t* const payload_out, uint8_t* const len_out, uint16_t code, uint8_t code_bit_len)
 {
     uint16_t cur_code_bit = (uint16_t)1 << (code_bit_len - 1);
 
@@ -783,7 +790,7 @@ void _fmavX_encode_put_bits(uint8_t* payload_out, uint8_t* len_out, uint16_t cod
 }
 
 
-void _fmavX_encode_rle(uint8_t* payload_out, uint8_t* len_out, uint8_t c, uint8_t RLE_cnt)
+void _fmavX_encode_rle(uint8_t* const payload_out, uint8_t* const len_out, uint8_t c, uint8_t RLE_cnt)
 {
 uint16_t code;
 
@@ -814,11 +821,11 @@ uint16_t code;
 }
 
 
-uint8_t _fmavX_payload_compress(uint8_t* payload_out, uint8_t* len_out, uint8_t* payload, uint8_t len)
+uint8_t _fmavX_payload_compress(uint8_t* const payload_out, uint8_t* const len_out, const uint8_t* const payload, uint8_t len)
 {
 uint16_t code; // can be 2 - 13 bits
 uint8_t is_in_RLE;
-uint8_t RLE_char;
+uint8_t RLE_char = 0; // to make gcc12 happy, avoid warning may be used uninitialized
 uint8_t RLE_cnt;
 
     *len_out = 0;
@@ -901,7 +908,7 @@ typedef enum {
 uint8_t fmavx_in_buf[300];
 
 
-uint8_t _fmavX_decode_get_bits(uint8_t* code, uint8_t len, uint8_t bits_len)
+uint8_t _fmavX_decode_get_bits(uint8_t* const code, uint8_t len, uint8_t bits_len)
 {
     *code = 0;
     for (uint8_t i = 0; i < bits_len; i++) {
@@ -922,7 +929,7 @@ uint8_t _fmavX_decode_get_bits(uint8_t* code, uint8_t len, uint8_t bits_len)
 }
 
 
-void _fmavX_payload_decompress(uint8_t* payload_out, uint8_t* len_out, uint8_t len)
+void _fmavX_payload_decompress(uint8_t* const payload_out, uint8_t* const len_out, uint8_t len)
 {
     memcpy(fmavx_in_buf, payload_out, len); // copy current payload into work buffer
 

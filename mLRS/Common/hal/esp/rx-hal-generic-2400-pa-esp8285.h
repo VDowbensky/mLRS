@@ -67,13 +67,14 @@ IRAM_ATTR void sx_amp_receive(void)
     gpio_high(SX_RX_EN);
 }
 
-IRAM_ATTR void sx_dio_enable_exti_isr(void)
+void sx_dio_init_exti_isroff(void) {}
+
+void sx_dio_enable_exti_isr(void)
 {
     attachInterrupt(SX_DIO1, SX_DIO_EXTI_IRQHandler, RISING);
 }
 
-void sx_dio_init_exti_isroff(void) {}
-void sx_dio_exti_isr_clearflag(void) {}
+IRAM_ATTR void sx_dio_exti_isr_clearflag(void) {}
 
 
 //-- Button
@@ -100,12 +101,13 @@ void leds_init(void)
     gpio_init(LED_RED, IO_MODE_OUTPUT_PP_LOW);
 }
 
-void led_red_off(void) { gpio_low(LED_RED); }
-void led_red_on(void) { gpio_high(LED_RED); }
-void led_red_toggle(void) { gpio_toggle(LED_RED); }
+IRAM_ATTR void led_red_off(void) { gpio_low(LED_RED); }
+IRAM_ATTR void led_red_on(void) { gpio_high(LED_RED); }
+IRAM_ATTR void led_red_toggle(void) { gpio_toggle(LED_RED); }
 
 
 //-- POWER
+#ifndef POWER_OVERLAY
 
 #define POWER_GAIN_DBM            18 // gain of a PA stage if present
 #define POWER_SX1280_MAX_DBM      SX1280_POWER_3_DBM  // maximum allowed sx power
@@ -119,3 +121,5 @@ const rfpower_t rfpower_list[] = {
     { .dbm = POWER_17_DBM, .mW = 50 },
     { .dbm = POWER_20_DBM, .mW = 100 },
 };
+
+#endif // !POWER_OVERLAY

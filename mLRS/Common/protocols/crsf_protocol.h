@@ -195,6 +195,21 @@ typedef union
     });
 } tCrsfChannelBuffer;
 
+#define CRSF_CHANNELPACKET_LEN  22 // LEN vs SIZE style guide ??
+
+
+// adr, len, frame id, data, crc
+CRSF_PACKED(
+typedef struct {
+    uint8_t address;
+    uint8_t len;
+    uint8_t frame_id;
+    tCrsfChannelBuffer ch;
+    uint8_t crc;
+}) tCrsfChannelFrame;
+
+#define CRSF_CHANNELPACKET_FRAME_LEN  (CRSF_CHANNELPACKET_LEN + 4)
+
 
 //-- Link statistics frames
 
@@ -227,6 +242,19 @@ typedef struct
 }) tCrsfLinkStatistics;
 
 #define CRSF_LINK_STATISTICS_LEN  10
+
+
+// adr, len, frame id, data, crc
+CRSF_PACKED(
+typedef struct {
+    uint8_t address;
+    uint8_t len;
+    uint8_t frame_id;
+    tCrsfLinkStatistics ls;
+    uint8_t crc;
+}) tCrsfLinkStatisticsFrame;
+
+#define CRSF_LINK_STATISTICS_FRAME_LEN  (CRSF_LINK_STATISTICS_LEN + 4)
 
 
 /* 0x1D Link Statistics TX
@@ -274,7 +302,7 @@ typedef struct
     int32_t longitude; // degree / 1e7                // OpenTx -> "GPS"
     uint16_t groundspeed; // km/h / 100               // OpenTx -> "GSpd"
     uint16_t gps_heading; // degree / 100             // OpenTx -> "Hdg"
-    uint16_t altitude; // meter - 1000m offset        // OpenTx -> "GAlt"
+    uint16_t altitude; // meter - 1000m offset        // OpenTx -> "GAlt" NO: OTX2.15 has a bug, shows it also as "Alt"!!
     uint8_t satellites;                               // OpenTx -> "Sats"
 }) tCrsfGps;
 
@@ -284,7 +312,7 @@ typedef struct
 CRSF_PACKED(
 typedef struct
 {
-    int16_t climb_rate; // units ??? m/s / 100 indirectly concluded from otx    // OpenTx -> "VSpd"
+    int16_t climb_rate; // cm/s, m/s / 100 indirectly concluded from otx    // OpenTx -> "VSpd"
 }) tCrsfVario;
 
 #define CRSF_VARIO_LEN  2
@@ -325,7 +353,7 @@ typedef struct
 CRSF_PACKED(
 typedef struct
 {
-    uint16_t altitude; // units ??? message ???       // OpenTx -> "Alt"
+    uint16_t altitude; // dm -1000m if 0x8000 not set, else in m    // OpenTx -> "Alt"
 }) tCrsfBaroAltitude;
 
 #define CRSF_BARO_ALTITUDE_LEN  2

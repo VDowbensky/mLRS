@@ -79,8 +79,8 @@ uint8_t rssi_i8_to_mavradio(int8_t rssi_i8, bool connected)
 }
 
 
-// -120 ... -50 -> 172 .. 1877
-uint16_t rssi_i8_to_ap_sbus(int8_t rssi_i8)
+// convert rssi to internal rc range, then further converted to output, -120 ... -50 -> 172 .. 1877
+uint16_t rssi_i8_to_rc(int8_t rssi_i8)
 {
     if (rssi_i8 == RSSI_INVALID) return 0;
     if (rssi_i8 > -50) return 1877; // max value
@@ -93,12 +93,12 @@ uint16_t rssi_i8_to_ap_sbus(int8_t rssi_i8)
 }
 
 
-// 0 ... 100 -> 191 .. 1792 = 1000 .. 2000 us
-uint16_t lq_to_sbus_crsf(uint8_t lq)
+// convert lq to internal rc range, then further converted to output, 0 ... 100 -> 172 .. 1877 = 1000 .. 2000 us
+uint16_t lq_to_rc(uint8_t lq)
 {
-    if (lq >= 100) return 1792; // max value
+    if (lq >= 100) return 1877; // max value
 
-    return ((uint32_t)lq * 1601 + 50) / 100 + 191;
+    return ((uint32_t)lq * 1705 + 50) / 100 + 172;
 }
 
 
@@ -149,7 +149,7 @@ int16_t rc_to_mavlink_13bcentered(uint16_t rc_ch)
 }
 
 
-//-- crsf
+//-- CRSF
 
 uint8_t crsf_cvt_power(int8_t power_dbm)
 {
@@ -201,6 +201,19 @@ uint8_t crsf_cvt_rssi_tx(int8_t rssi_i8)
 {
     if (rssi_i8 == RSSI_INVALID) return 0;
     return rssi_i8;
+}
+
+
+uint8_t crsf_cvt_rssi_percent(int8_t rssi, int16_t receiver_sensitivity_dbm)
+{
+    if (rssi == RSSI_INVALID) return 255;
+    if (rssi >= -50) return 100;
+    if (rssi <= receiver_sensitivity_dbm) return 0;
+
+    int32_t r = (int32_t)rssi - receiver_sensitivity_dbm;
+    int32_t m = (int32_t)(-50) - receiver_sensitivity_dbm;
+
+    return (100 * r + 49)/m;
 }
 
 
@@ -353,6 +366,21 @@ uint8_t except_from_bindphrase(char* bindphrase)
     uint8_t n = (cptr) ? cptr - bindphrase_chars : 0; // must not happen that c is not found, but play it safe
 
     return n % 5; // no, #1, #6, #11, #13 = 5 cases = EXCEPT_NUM
+}
+
+
+void bindphrase_from_u32(char* bindphrase, uint32_t bindphrase_u32)
+{
+    uint32_t base = 40*40*40*40*40; // 40^5
+
+    for (uint8_t i = 0; i < 6; i++) {
+
+        uint32_t v = bindphrase_u32 / base;
+        bindphrase[5 - i] = (v < 40) ? bindphrase_chars[v] : '0'; // must not happen, but play it safe
+
+        bindphrase_u32 -= v * base;
+        base /= 40;
+    }
 }
 
 
