@@ -59,8 +59,8 @@ typedef enum {
   #if (UARTB_TXBUFSIZE > 0) && (UARTB_TXBUFSIZE < 256)
     #error UARTB_TXBUFSIZE must be 0 or >= 256
   #endif
-  #if (UARTB_RXBUFSIZE < 256)
-    #error UARTB_RXBUFSIZE must be >= 256
+  #if (UARTB_RXBUFSIZE > 0) && (UARTB_RXBUFSIZE < 256)
+    #error UARTB_TXBUFSIZE must be 0 or >= 256
   #endif
 #endif
 
@@ -72,6 +72,12 @@ typedef enum {
 IRAM_ATTR void uartb_putbuf(uint8_t* buf, uint16_t len)
 {
     UARTB_SERIAL_NO.write((uint8_t*)buf, len);
+}
+
+
+IRAM_ATTR uint16_t uartb_tx_notfull(void)
+{
+    return 1; // fifo not full
 }
 
 
@@ -92,6 +98,11 @@ IRAM_ATTR void uartb_tx_flush(void)
 IRAM_ATTR char uartb_getc(void)
 {
     return (char)UARTB_SERIAL_NO.read();
+}
+
+IRAM_ATTR void uartb_getbuf(char* buf, uint16_t len)
+{
+    UARTB_SERIAL_NO.readBytes(buf, len);
 }
 
 
@@ -188,6 +199,11 @@ void uartb_init(void)
 {
     uartb_init_isroff();
     // isr is enabled !
+}
+
+void uartb_rx_enableisr(FunctionalState flag)
+{
+    // not supported on ESP, allows in functionality without lots of ifdefs
 }
 
 

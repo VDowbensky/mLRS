@@ -21,8 +21,7 @@ class tTxDisp
   public:
     void Init(void) {}
     void Tick_ms(void) {}
-    uint8_t Task(void) { return 0; }
-    void DrawNotify(const char* s) {}
+    void DrawNotify(const char* const s) {}
     void DrawBoot(void) {}
 };
 
@@ -35,15 +34,21 @@ class tTxDisp
 #include "../Common/thirdparty/gfxfontFreeMono9pt7b.h"
 #include "../Common/thirdparty/gdisp.h"
 #include "../Common/thirdparty/mlrs-logo.h"
+#include "../Common/tasks.h"
 
 
 extern bool connected(void);
 extern bool connected_and_rx_setup_available(void);
 extern tStats stats;
 extern tGDisplay gdisp;
+extern tSetupMetaData SetupMetaData;
+extern tSetup Setup;
+extern tGlobalConfig Config;
+extern tTxInfo info;
+extern tTasks tasks;
+void i2c_spin(uint16_t chunksize);
 
 
-#define DISP_START_TMO_MS       SYSTICK_DELAY_MS(500)
 #define DISP_START_PAGE_TMO_MS  SYSTICK_DELAY_MS(1500)
 #define KEYS_DEBOUNCE_TMO_MS    SYSTICK_DELAY_MS(40)
 
@@ -62,8 +67,6 @@ typedef enum {
 
     PAGE_NAV_MIN = PAGE_MAIN, // left endpoint
     PAGE_NAV_MAX = PAGE_ACTIONS, //PAGE_RX, // right endpoint
-
-    PAGE_UNDEFINED, // this is also used to time startup page sequence
 } PAGE_ENUM;
 
 
@@ -111,9 +114,10 @@ class tTxDisp
     void UpdateMain(void);
     void SetBind(void);
     void Draw(void);
-    uint8_t Task(void);
-    void DrawNotify(const char* s);
+    void DrawNotify(const char* const s);
     void DrawBoot(void);
+
+    void SpinI2C(void);
 
     typedef struct {
         uint8_t list[SETUP_PARAMETER_NUM];
@@ -126,7 +130,7 @@ class tTxDisp
     bool key_has_been_pressed(uint8_t key_idx);
 
     void draw_page_startup(void);
-    void draw_page_notify(const char* s);
+    void draw_page_notify(const char* const s);
     void draw_page_main(void);
     void draw_page_common(void);
     void draw_page_tx(void);
@@ -138,11 +142,10 @@ class tTxDisp
     void draw_page_main_sub2(void);
     void draw_page_main_sub3(void);
 
-    void draw_header(const char* s);
-    void draw_options(tParamList* list);
+    void draw_header(const char* const s);
+    void draw_options(tParamList* const list);
 
     bool initialized;
-    uint8_t task_pending;
     bool connected_last; // to detect connection changes
     bool setupmetadata_rx_available_last; // to detect changes
 
@@ -167,7 +170,8 @@ class tTxDisp
     uint8_t idx_focused;        // index of highlighted param
     bool idx_focused_in_edit;   // if param is in edit
     uint8_t idx_focused_pos;    // pos in str6 (bind phrase) parameter
-    uint8_t idx_focused_task_pending;
+
+    uint8_t edit_setting_task_pending;
 
     tParamList common_list;
     tParamList tx_list;
@@ -195,7 +199,6 @@ void tTxDisp::Init(void)
 #endif
     }
 
-    task_pending = TX_TASK_NONE;
     connected_last = false;
     setupmetadata_rx_available_last = false;
 
@@ -208,9 +211,9 @@ void tTxDisp::Init(void)
 
     keys_state = fiveway_read();
 
-    page = PAGE_UNDEFINED;
-    page_startup_tmo = DISP_START_TMO_MS;
-    page_modified = false;
+    page = PAGE_STARTUP; // start with startup page
+    page_startup_tmo = DISP_START_PAGE_TMO_MS;
+    page_modified = true;
     page_update = false;
 
     subpage = SUBPAGE_DEFAULT;
@@ -235,15 +238,8 @@ void tTxDisp::Init(void)
     idx_max = 0;
     idx_focused_in_edit = false;
     idx_focused_pos = 0;
-    idx_focused_task_pending = TX_TASK_NONE;
-}
 
-
-uint8_t tTxDisp::Task(void)
-{
-    uint8_t task = task_pending;
-    task_pending = TX_TASK_NONE;
-    return task;
+    edit_setting_task_pending = MAIN_TASK_NONE;
 }
 
 
@@ -306,18 +302,13 @@ uint16_t keys, i, keys_new;
         }
     }
 
-    // startup page
-    if (page_startup_tmo) {
+    // finish startup page
+    if (page == PAGE_STARTUP && page_startup_tmo) {
         page_startup_tmo--;
         if (!page_startup_tmo) {
-            if (page == PAGE_UNDEFINED) {
-                page = PAGE_STARTUP;
-                page_startup_tmo = DISP_START_PAGE_TMO_MS;
-            } else {
-                page = PAGE_MAIN;
-                subpage = SUBPAGE_DEFAULT;
-                subpage_max = SUBPAGE_MAIN_NUM - 1;
-            }
+            page = PAGE_MAIN;
+            subpage = SUBPAGE_DEFAULT;
+            subpage_max = SUBPAGE_MAIN_NUM - 1;
             page_modified = true;
         }
         return;
@@ -414,16 +405,16 @@ if(!idx_focused_in_edit){
     if (key_has_been_pressed(KEY_CENTER)) {
         idx_focused_in_edit = false;
         page_modified = true;
-        if (idx_focused_task_pending != CLI_TASK_NONE) task_pending = idx_focused_task_pending;
-        idx_focused_task_pending = CLI_TASK_NONE;
+        if (idx_focused_task_pending != MAIN_TASK_NONE) task_pending = idx_focused_task_pending;
+        idx_focused_task_pending = MAIN_TASK_NONE;
     } else {
         edit_setting();
     } */
     if (edit_setting()) { // edit, and finish if true
         idx_focused_in_edit = false;
         page_modified = true;
-        if (idx_focused_task_pending != TX_TASK_NONE) task_pending = idx_focused_task_pending;
-        idx_focused_task_pending = TX_TASK_NONE;
+        if (edit_setting_task_pending != MAIN_TASK_NONE) tasks.SetDisplayTask(edit_setting_task_pending);
+        edit_setting_task_pending = MAIN_TASK_NONE;
     }
 
 }
@@ -460,16 +451,16 @@ void tTxDisp::run_action(void)
     case DISP_ACTION_STORE:
         page = PAGE_NOTIFY_STORE;
         page_modified = true;
-        task_pending = TX_TASK_PARAM_STORE;
+        tasks.SetDisplayTask(TX_TASK_PARAM_STORE);
         break;
     case DISP_ACTION_BIND:
-        task_pending = TX_TASK_BIND;
+        tasks.SetDisplayTask(MAIN_TASK_BIND_START);
         break;
     case DISP_ACTION_BOOT:
-        task_pending = TX_TASK_SYSTEM_BOOT;
+        tasks.SetDisplayTask(MAIN_TASK_SYSTEM_BOOT);
         break;
     case DISP_ACTION_FLASH_ESP:
-        task_pending = TX_TASK_FLASH_ESP;
+        tasks.SetDisplayTask(TX_TASK_FLASH_ESP);
         break;
     }
 }
@@ -490,13 +481,14 @@ void tTxDisp::SetBind(void)
 }
 
 
-void tTxDisp::DrawNotify(const char* s)
+void tTxDisp::DrawNotify(const char* const s)
 {
     if (!initialized) return;
     page_modified = true;
     draw_page_notify(s);
     gdisp_update();
     page_modified = false;
+    i2c_spin(GDISPLAY_BUFSIZE); // needed for ESP32 // always draw it directly to the buffer
 }
 
 
@@ -545,6 +537,12 @@ void tTxDisp::Draw(void)
 }
 
 
+void tTxDisp::SpinI2C(void)
+{
+    i2c_spin(64); // for timing on ESP32 see below
+}
+
+
 //-------------------------------------------------------
 // Low-level routines
 //-------------------------------------------------------
@@ -578,7 +576,7 @@ void _draw_dot2(uint8_t x, uint8_t y)
 }
 
 
-void tTxDisp::draw_header(const char* s)
+void tTxDisp::draw_header(const char* const s)
 {
     gdisp_clear();
 
@@ -592,7 +590,7 @@ void tTxDisp::draw_header(const char* s)
 }
 
 
-void tTxDisp::draw_options(tParamList* list)
+void tTxDisp::draw_options(tParamList* const list)
 {
 char s[32];
 
@@ -671,7 +669,7 @@ void tTxDisp::draw_page_startup(void)
 }
 
 
-void tTxDisp::draw_page_notify(const char* s)
+void tTxDisp::draw_page_notify(const char* const s)
 {
     if (!page_modified) return;
 
@@ -701,9 +699,9 @@ int8_t power;
     draw_header("Main");
 
     gdisp_setcurX(50);
-    param_get_val_formattedstr(s, PARAM_INDEX_MODE); // 1 = index of Mode
+    param_get_val_formattedstr(s, PARAM_INDEX_MODE, PARAM_FORMAT_DISPLAY); // 1 = index of Mode
     if (strlen(s) > 5) {
-        gdisp_setcurXY(35, 6);
+        gdisp_setcurXY(43, 6);
     } else {
         gdisp_setcurXY(50, 6);
     }
@@ -912,6 +910,11 @@ char s[32];
     gdisp_setcurXY(0, 1 * 10 + 20);
     gdisp_puts(VERSIONONLYSTR);
 
+    if (info.WirelessDeviceName_disp(s)) {
+        gdisp_setcurXY(60, 1 * 10 + 20);
+        gdisp_puts(s);
+    }
+
     if (connected_and_rx_setup_available()) {
         gdisp_setcurXY(0, 3 * 10 + 20);
         gdisp_puts(SetupMetaData.rx_device_name);
@@ -949,16 +952,11 @@ void tTxDisp::draw_page_common(void)
     draw_header("Common");
     draw_options(&common_list);
 
-    if (Config.FrequencyBand == SETUP_FREQUENCY_BAND_2P4_GHZ) {
+    char except_str[8];
+    if (except_str_from_bindphrase(except_str, Setup.Common[Config.ConfigId].BindPhrase, Config.FrequencyBand)) {
         gdisp_setcurXY(0, 4 * 10 + 20); // last line
         gdisp_puts("except ");
-        switch (except_from_bindphrase(Setup.Common[Config.ConfigId].BindPhrase)) {
-        case 1: gdisp_puts("/e1"); break;
-        case 2: gdisp_puts("/e6"); break;
-        case 3: gdisp_puts("/e11"); break;
-        case 4: gdisp_puts("/e13"); break;
-        default: gdisp_puts("/--");
-        }
+        gdisp_puts(except_str);
     }
 }
 
@@ -1130,7 +1128,7 @@ bool tTxDisp::edit_setting(void)
 
     }
 
-    if (rx_param_changed) idx_focused_task_pending = TX_TASK_RX_PARAM_SET;
+    if (rx_param_changed) edit_setting_task_pending = TX_TASK_RX_PARAM_SET;
     return false; // keep on editing
 }
 
@@ -1183,5 +1181,12 @@ FRM303 F072 48 MHz
   further optimization
   - no gdisp_u_() in gdisp_setpixel_()
   - func ptr for gdisp_setpixel_()
+
+31.05.2024:
+  timing on ESP32:
+    1024: 10.1 ms
+    256:   2.6 ms
+    128:   1.35 ms
+    64:    0.72 ms
 */
 
