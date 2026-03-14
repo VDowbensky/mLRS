@@ -16,6 +16,12 @@ https://www.espressif.com/sites/default/files/documentation/esp8266-technical_re
 is used in many ELRS Tx modules
 
 ------------------------------
+ELRS Tx Module ESP32-C3 backpack
+------------------------------
+board: Generic ESP32C3 Module
+is used in many ELRS Tx modules
+
+------------------------------
 Espressif ESP32-DevKitC V4
 ------------------------------
 board: ESP32 Dev Module
@@ -133,8 +139,32 @@ GPIO15 = RTC_GPIO13
 
     #undef GPIO0_IO
     #define GPIO0_IO  0
-    #undef WIRELESS_PROTOCOL
-    #define WIRELESS_PROTOCOL 1 // make UDP the default
+    #if WIRELESS_PROTOCOL != 4
+        #undef WIRELESS_PROTOCOL
+        #define WIRELESS_PROTOCOL 1 // make UDP the default
+    #endif    
+
+
+//-- ELRS Tx Module ESP32C3 backpack
+#elif defined MODULE_ESP32C3_ELRS_TX // ARDUINO_ESP32C3_DEV, ARDUINO_BOARD == ESP32C3_DEV
+    #ifndef ARDUINO_ESP32C3_DEV // ARDUINO_BOARD != ESP32C3_DEV
+        #error Select board ESP32C3 Dev Module!
+    #endif
+
+    #undef USE_SERIAL_DBG1
+    #define USE_SERIAL1_DBG
+    #undef USE_SERIAL2_DBG
+
+    #define SERIAL_RXD 20 // = RX1
+    #define SERIAL_TXD 21 // = TX1
+
+    #undef LED_IO
+    #undef GPIO0_IO
+    #define GPIO0_IO  9
+    #if WIRELESS_PROTOCOL != 4
+        #undef WIRELESS_PROTOCOL
+        #define WIRELESS_PROTOCOL 1 // make UDP the default
+    #endif    
 
 
 //-- MatekSys TxM-TD30 mLRS Tx module
@@ -156,8 +186,10 @@ GPIO15 = RTC_GPIO13
 
     #undef GPIO0_IO
     #define GPIO0_IO  0
-    #undef WIRELESS_PROTOCOL
-    #define WIRELESS_PROTOCOL 3 // make BlueTooth the default
+    #if WIRELESS_PROTOCOL != 4
+        #undef WIRELESS_PROTOCOL
+        #define WIRELESS_PROTOCOL 3 // make BlueTooth the default
+    #endif    
     #define DEVICE_NAME_HEAD "Matek"
 
 
@@ -252,8 +284,11 @@ GPIO15 = RTC_GPIO13
     #ifdef MODULE_DIY_E28DUAL_MODULE02_G491RE
         #undef GPIO0_IO
         #define GPIO0_IO  0
-        #undef WIRELESS_PROTOCOL
-        #define WIRELESS_PROTOCOL 1 // make UDP the default
+        #if WIRELESS_PROTOCOL != 4
+            #undef WIRELESS_PROTOCOL
+            #define WIRELESS_PROTOCOL 1 // make UDP the default
+        #endif    
+        //#define USE_SERIAL_DBG1 // Rx1 = 26, Tx1 = 27
     #endif
 
 

@@ -19,6 +19,9 @@ extern "C" {
 #ifndef HAL_PCD_MODULE_ENABLED
   #error HAL_PCD_MODULE_ENABLED not defined, enable it in Core\Inc\stm32yyxx_hal_conf.h!
 #else
+#if !defined STM32G431xx && !defined STM32G441xx && !defined STM32G491xx && !defined STM32G474xx
+  #warning NAK flow control not tested on non STM32G4 MCUs!
+#endif
 
 
 #include "usbd_cdc.h"
@@ -37,6 +40,7 @@ extern "C" {
 uint8_t usb_rx_available(void);
 uint16_t usb_rx_bytesavailable(void);
 char usb_getc(void);
+void usb_getbuf(uint8_t* const buf, uint16_t len);
 
 uint8_t usb_tx_full(void);
 void usb_putc(uint8_t c);

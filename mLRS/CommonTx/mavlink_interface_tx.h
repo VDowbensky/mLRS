@@ -29,29 +29,42 @@ extern bool connected_and_rx_setup_available(void);
 extern tStats stats;
 
 
-#define RADIO_LINK_SYSTEM_ID      51 // SiK uses 51, 68
+//#define RADIO_LINK_SYSTEM_ID      51 // SiK uses 51, 68
+//#define RADIO_LINK_SYSTEM_ID      TX_RADIO_LINK_SYSTEM_ID // moved to common_conf.h
+#define RADIO_LINK_SYSTEM_ID      (51 + Setup.Rx.MavlinkSystemID)
 
 #define MAVLINK_BUF_SIZE          300 // needs to be larger than max MAVLink frame size = 286 bytes
 
 
 // keeps info on the vehicle
 // currently only used to send vehicle state in mBridge info
+// we react only to heartbeats from ArduPilot (not yet PX4), so whenever sysid > 0 we can assume ArduPilot
 class tTxVehicle
 {
   public:
     void Init(void);
+    void Do(void);
+
     uint8_t State(void);
+    bool RequestParamBattMonitor(void); // to tell parent class to send respective message
+    bool RequestParamBattCapacity(void);
 
     bool is_seen_and_msg_is_for_autopilot(fmav_message_t* const msg);
     void handle_heartbeat(fmav_message_t* const msg, fmav_heartbeat_t* const payload);
     void handle_extended_sys_state(fmav_extended_sys_state_t* const payload);
+    void handle_param_value(fmav_message_t* const msg);
 
+    uint8_t sysid; // 0 indicates autopilot not detected, indicates data is invalid
   private:
-    uint8_t sysid; // 0 indicates data is invalid
     uint8_t is_armed;
     uint8_t is_flying;
     uint8_t type;
     uint8_t flight_mode;
+
+    // to request BATT_CAPACITY
+    int8_t param_request_cnt; // <= 0 means off
+    uint32_t param_request_tlast_ms;
+    bool trigger_param_request;
 };
 
 
@@ -75,6 +88,7 @@ class tTxMavlink
     void send_msg_serial_out(void);
 
     void send_radio_status(void); // to serial_out
+    void send_param_request_read(const char* const requested_param_id); // to link_out
 
     uint16_t task_pending_mask;
     uint32_t task_pending_delay_ms;
@@ -138,7 +152,7 @@ void tTxMavlink::Init(tSerialBase* const _serialport, tSerialBase* const _mbridg
 {
     // if ChannelsSource = MBRIDGE:
     //   SerialDestination = SERIAL or SERIAL2 => router with ser = mbridge & ser2 = serial/serial2
-    //   SerialDestination = MBRDIGE           => no router, only ser = mbridge (ser2 = null)
+    //   SerialDestination = MBRIDGE           => no router, only ser = mbridge (ser2 = null)
     // => ser2 != nullptr indicates that router is to be used
     switch (Setup.Tx[Config.ConfigId].SerialDestination) {
     case SERIAL_DESTINATION_SERIAL:
@@ -149,7 +163,7 @@ void tTxMavlink::Init(tSerialBase* const _serialport, tSerialBase* const _mbridg
         ser = _serial2port;
         ser2 = (Setup.Tx[Config.ConfigId].ChannelsSource == CHANNEL_SOURCE_MBRIDGE) ? _mbridge : nullptr;
         break;
-    case SERIAL_DESTINATION_MBRDIGE:
+    case SERIAL_DESTINATION_MBRIDGE:
         ser = _mbridge;
         ser2 = nullptr;
         break;
@@ -238,14 +252,20 @@ void tTxMavlink::Do(void)
         radio_status_tlast_ms = tnow_ms;
     }
 
+    vehicle.Do();
+
     if (inject_radio_status) { // && serial.tx_is_empty()) {
         inject_radio_status = false;
         send_radio_status();
         return; // only one per loop
     }
 
+    if (vehicle.RequestParamBattCapacity()) {
+        send_param_request_read("BATT_CAPACITY"); // this goes to link_out, not serial_out
+    }
+
 #ifdef USE_FEATURE_MAVLINK_COMPONENT
-    component_do();
+    component_do(); // may send to serial_out, so should come last
 #endif
 }
 
@@ -501,14 +521,18 @@ void tTxMavlink::handle_msg_serial_out(fmav_message_t* const msg)
     if (!vehicle.is_seen_and_msg_is_for_autopilot(msg)) return;
 
     switch (msg->msgid) {
-    case FASTMAVLINK_MSG_ID_EXTENDED_SYS_STATE:{
+    case FASTMAVLINK_MSG_ID_EXTENDED_SYS_STATE: {
         fmav_extended_sys_state_t payload;
         fmav_msg_extended_sys_state_decode(&payload, msg);
         vehicle.handle_extended_sys_state(&payload);
         }break;
+    case FASTMAVLINK_MSG_ID_PARAM_VALUE: {
+        // this is special, handling is by vehicle class, but needs to be related to passthrough class
+        vehicle.handle_param_value(msg);
+        }break;
     }
 
-    // MAVLink packet link quality, for stream from autopilot only
+    // calculate MAVLink packet link quality from seq field, for stream from autopilot only
     if (msg_seq_initialized) {
         uint8_t expected_seq = msg_seq_last + 1;
         stats.doMavlinkCnt(msg->seq == expected_seq);
@@ -546,6 +570,29 @@ uint8_t rssi, remrssi, txbuf, noise;
         &status_serial_out);
 
     send_msg_serial_out();
+}
+
+
+void tTxMavlink::send_param_request_read(const char* const requested_param_id)
+{
+#ifdef USE_FEATURE_MAVLINKX
+    char param_id[16+1];
+    strbufstrcpy(param_id, requested_param_id, 16);
+
+    // goes to link out send_msg_serial_out();
+
+    fmav_msg_param_request_read_pack(
+        &msg_buf,
+        RADIO_LINK_SYSTEM_ID,
+        MAV_COMP_ID_TELEMETRY_RADIO,
+        vehicle.sysid, MAV_COMP_ID_AUTOPILOT1,
+        param_id,
+        -1,
+        //uint8_t target_system, uint8_t target_component, const char* param_id, int16_t param_index,
+        &status_serial_out);
+
+    send_msg_fifo_link_out(&msg_buf); // goes to link out
+#endif
 }
 
 
@@ -629,10 +676,10 @@ uint8_t dummy[18+2] = {};
     fmav_msg_autopilot_version_pack(
         &msg_buf,
         RADIO_LINK_SYSTEM_ID, MAV_COMP_ID_TELEMETRY_RADIO, // sysid, compid, SiK uses 51, 68
-        MAV_PROTOCOL_CAPABILITY_MAVLINK2 | MAV_PROTOCOL_CAPABILITY_PARAM_ENCODE_BYTEWISE,
+        MAV_PROTOCOL_CAPABILITY_MAVLINK2 | MAV_PROTOCOL_CAPABILITY_PARAM_ENCODE_BYTEWISE | MAV_PROTOCOL_CAPABILITY_COMMAND_INT,
         VERSION, 0, 0, 0,
         dummy, dummy, dummy,
-        MAVLINK_VID, MAVLINK_PID, 0, dummy,
+        MAVLINK_VID, MAVLINK_PID, 0, dummy, // TODO: set a uid
         //uint64_t capabilities,
         //uint32_t flight_sw_version, uint32_t middleware_sw_version, uint32_t os_sw_version, uint32_t board_version,
         //const uint8_t* flight_custom_version, const uint8_t* middleware_custom_version, const uint8_t* os_custom_version,
@@ -754,7 +801,7 @@ void tTxMavlink::component_handle_msg(fmav_message_t* const msg)
 
             switch (command) {
                 case MAV_CMD_REQUEST_MESSAGE: // #512
-                    switch (param1) {
+                    switch (param1) { // param1: MAVLink message id of requested message
                         case FASTMAVLINK_MSG_ID_AUTOPILOT_VERSION: // #148
                             inject_task |= INJECT_TASK_AUTOPILOT_VERSION;
                             res = MAV_RESULT_ACCEPTED;
@@ -764,12 +811,15 @@ void tTxMavlink::component_handle_msg(fmav_message_t* const msg)
                             res = MAV_RESULT_ACCEPTED;
                             break;
                     }
+                    // we ignore param7 (target address for requested message, if message has target address fields, 0,1,2)
                     break;
                 case MAV_CMD_REQUEST_PROTOCOL_VERSION: // #519, replaced by MAV_CMD_REQUEST_MESSAGE
+                    // we ignore param1 (should test for 0,1, and ignore else)
                     inject_task |= INJECT_TASK_PROTOCOL_VERSION;
                     res = MAV_RESULT_ACCEPTED;
                     break;
                 case MAV_CMD_REQUEST_AUTOPILOT_CAPABILITIES: // #520, replaced by MAV_CMD_REQUEST_MESSAGE
+                    // we ignore param1 (should test for 0,1, and ignore else)
                     inject_task |= INJECT_TASK_AUTOPILOT_VERSION;
                     res = MAV_RESULT_ACCEPTED;
                     break;
@@ -823,6 +873,7 @@ void tTxMavlink::component_do(void)
 
     if (inject_task & INJECT_TASK_PROTOCOL_VERSION) {
         inject_task &=~ INJECT_TASK_PROTOCOL_VERSION;
+        // note: message PROTOCOL_VERSION (#300) is deprecated and replaced by nothing
         send_autopilot_version();
         return; // only one per loop
     }
@@ -907,6 +958,10 @@ void tTxVehicle::Init(void)
     is_flying = UINT8_MAX;
     type = UINT8_MAX;
     flight_mode = UINT8_MAX;
+
+    param_request_cnt = 10; // <= 0 means off
+    param_request_tlast_ms = 0;
+    trigger_param_request = false;
 }
 
 
@@ -915,6 +970,80 @@ uint8_t tTxVehicle::State(void)
     if (is_armed == UINT8_MAX) return UINT8_MAX;
     if (is_armed == 1 && is_flying == 1) return 2;
     return is_armed;
+}
+
+
+void tTxVehicle::Do(void)
+{
+#ifdef USE_FEATURE_MAVLINKX
+    uint32_t tnow_ms = millis32(); // we need to get fresh time, since a HEARTBEAT might be received in the main Do loop
+
+    // we want to start requests only on first connection
+    // this is achieved by checking for sysid, which is valid only if the autopilot was seen
+    // request are stopped when a response is obtained
+    // TODO: should we add a counter to limit number of tries?
+
+    if (!sysid) {
+        param_request_tlast_ms = tnow_ms + 1563; // first request in ca 1.5 sec after receive of first heartbeat
+    }
+
+    if (!sysid) return; // from here on assume we have seen the vehicle's heartbeat
+
+    // we want to request for PARAM BATT_CAPACITY when
+    // sysid > 0 (which means we see a fc) and
+    // param_request_cnt > 0 (which means we don't have gotten that value yet)
+
+    if (param_request_cnt > 0) {
+        if ((tnow_ms - param_request_tlast_ms) > 1563) {
+            param_request_tlast_ms = tnow_ms;
+            param_request_cnt--;
+            trigger_param_request = true;
+        }
+    }
+#endif
+}
+
+
+bool tTxVehicle::RequestParamBattCapacity(void)
+{
+#ifdef USE_FEATURE_MAVLINKX
+    if (trigger_param_request) {
+        trigger_param_request = false;
+//dbg.puts("\nsend param request");
+        return true;
+    }
+#endif
+    return false;
+}
+
+
+void tTxVehicle::handle_param_value(fmav_message_t* const msg)
+{
+#ifdef USE_FEATURE_MAVLINKX
+    // we have checked already that msg comes from our autopilot
+    if (param_request_cnt < 0) return; // we do have it already, so let's save time and not process again
+
+    fmav_param_value_t payload;
+    fmav_msg_param_value_decode(&payload, msg);
+
+    // note: ArduPilot converts from/to float
+    // we should detect AUTOPILOT_VERSION.capabilities,
+    // but for AP we know it's MAV_PROTOCOL_CAPABILITY_PARAM_ENCODE_C_CAST
+
+    // note: 'BATT_CAPACITY' is shorter than 16 chars, so we don't need to worry using str
+    if (!strcmp(payload.param_id, "BATT_CAPACITY")) {
+        uint32_t batt_capacity = payload.param_value;
+
+        // allow the user to set BATT_CAPACITY to 0 to disable sending it to yaapu
+        if (batt_capacity > 0) {
+            // communicate to the passthrough class
+            crsf.PassthroughSetBattery0Capacity(batt_capacity);
+        }
+
+        param_request_cnt = -1; // <= 0 means off
+//dbg.puts("\nparam batt cap received");
+    }
+#endif
 }
 
 
@@ -928,16 +1057,14 @@ bool tTxVehicle::is_seen_and_msg_is_for_autopilot(fmav_message_t* const msg)
 
 void tTxVehicle::handle_heartbeat(fmav_message_t* const msg, fmav_heartbeat_t* const payload)
 {
-    sysid = msg->sysid;
-    is_armed = (payload->base_mode & MAV_MODE_FLAG_SAFETY_ARMED) ? 1 : 0;
-
-    // ArduPilot provides flight mode number in custom mode
+    // TODO: PX4 ??
     if (payload->autopilot == MAV_AUTOPILOT_ARDUPILOTMEGA) {
+        sysid = msg->sysid;
+
+        is_armed = (payload->base_mode & MAV_MODE_FLAG_SAFETY_ARMED) ? 1 : 0;
         type = ap_vehicle_from_mavtype(payload->type);
+        // ArduPilot provides flight mode number in custom mode
         flight_mode = payload->custom_mode;
-    } else {
-        type = UINT8_MAX;
-        flight_mode = UINT8_MAX;
     }
 }
 

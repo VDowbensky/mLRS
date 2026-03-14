@@ -64,6 +64,7 @@ In tx-hal files:
 #define DEVICE_HAS_ESP_WIFI_BRIDGE_W_PASSTHRU_VIA_JRPIN5  // board has ESP32 or ESP82xx with its passthrough via JRPin5 port
 #define DEVICE_HAS_ESP_WIFI_BRIDGE_CONFIGURE  // board has ESP32 which allows configuration
 #define DEVICE_HAS_ESP_WIFI_BRIDGE_ESP8266    // board has ESP82xx in fact, not ESP32
+#define DEVICE_HAS_ESP_WIFI_BRIDGE_BUTTON2_FLASH    // board has button used to enter ESP flash mode
 #define DEVICE_HAS_HC04_MODULE_ON_SERIAL      // board has HC04 module on Serial port
 #define DEVICE_HAS_HC04_MODULE_ON_SERIAL2     // board has HC04 module on Serial2 port
 #define DEVICE_HAS_SYSTEMBOOT       // board has a means to invoke the system bootloader on startup
@@ -117,8 +118,12 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #include "matek/rx-hal-matek-mr900-22-wle5cc.h"
 #endif
 
-#ifdef RX_MATEK_MR900_TD30_G474CE
-#include "matek/rx-hal-matek-mr900-td30-g474ce.h"
+#ifdef RX_MATEK_MR900_30TD_G474CE
+#include "matek/rx-hal-matek-mr900-30td-g474ce.h"
+#endif
+
+#ifdef RX_MATEK_MR24_30C_G431KB
+#include "matek/rx-hal-matek-mr24-30c-g431kb.h"
 #endif
 
 #ifdef RX_MATEK_MR900_30C_G431KB
@@ -358,8 +363,11 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
   #define USE_ESP_WIFI_BRIDGE
   #if defined ESP_RESET && defined ESP_GPIO0
     #define USE_ESP_WIFI_BRIDGE_RST_GPIO0
+    #if defined DEVICE_HAS_ESP_WIFI_BRIDGE_CONFIGURE
+      #define USE_ESP_WIFI_BRIDGE_CONFIGURE
+    #endif
   #endif
-  #if defined ESP_DTR && defined ESP_RTS
+  #if (defined ESP_DTR && defined ESP_RTS) || defined ESP_DTR_RTS_USB
     #define USE_ESP_WIFI_BRIDGE_DTR_RTS
   #endif
   #if defined ESP_BOOT0
@@ -383,7 +391,7 @@ Note: Some "high-level" features are set for each device in the device_conf.h fi
 #endif
 
 #if defined DEVICE_HAS_DIVERSITY || defined DEVICE_HAS_DIVERSITY_SINGLE_SPI
-  #ifdef DEVICE_HAS_SX126x
+  #if defined DEVICE_HAS_SX126x
     #define SX2_DRIVER Sx126xDriver2
   #elif defined DEVICE_HAS_SX127x
     #define SX2_DRIVER Sx127xDriver2

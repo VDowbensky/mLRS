@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include "common_conf.h"
 #include "hal/device_conf.h"
+#include "setup_types.h"
 
 
 extern volatile uint32_t millis32(void);
@@ -29,6 +30,8 @@ void sxReadFrame(uint8_t antenna, void* const data, void* const data2, uint8_t l
 void sxSendFrame(uint8_t antenna, void* const data, uint8_t len, uint16_t tmo_ms);
 void sxGetPacketStatus(uint8_t antenna, tStats* const stats);
 
+extern tSetup Setup;
+extern tGlobalConfig Config;
 extern tStats stats;
 
 
@@ -55,9 +58,10 @@ class tBindBase
   public:
     void Init(void);
     bool IsInBind(void) { return is_in_binding; }
-    void StartBind(void) { binding_requested = true; }
-    void StopBind(void) { binding_stop_requested = true; }
+    void StartBind(void) { if (!is_in_binding) binding_requested = true; }
+    void StopBind(void) { if (is_in_binding) binding_stop_requested = true; }
     void ConfigForBind(void);
+    void HopToNextBind(uint16_t frequency_band); // SETUP_FREQUENCY_BAND_ENUM
     void Tick_ms(void);
     void Do(void);
     uint8_t Task(void);
@@ -78,9 +82,14 @@ class tBindBase
     void handle_receive(uint8_t antenna, uint8_t rx_status);
     void do_transmit(uint8_t antenna);
     uint8_t do_receive(uint8_t antenna, bool do_clock_reset);
+    void config_rf(void);
 
     bool is_pressed;
     int8_t pressed_cnt;
+
+  private:
+    tSxGlobalConfig* gconfig;
+    uint16_t mode_mask; // mask to handle toggling between 19 Hz and 19 Hz7x mode
 };
 
 
@@ -100,26 +109,74 @@ void tBindBase::Init(void)
     memcpy(&RxSignature, BIND_SIGNATURE_RX_STR, 8);
 
     auto_bind_tmo_ms = 1000 * RX_BIND_MODE_AFTER_POWERUP_TIME_SEC;
+
+    mode_mask = 0;
 }
 
 
 void tBindBase::ConfigForBind(void)
 {
-    // switch to 19 Mode, select lowest possible power
-    // we technically have to distinguish between MODE_19HZ or MODE_19HZ_7X
+    // used by both the Tx and Rx, switch to 19Hz or 19Hz7x mode, select lowest possible power
+    // we have to distinguish between MODE_19HZ or MODE_19HZ_7X
     // configure_mode() however does currently do the same for both cases
-#ifdef DEVICE_HAS_DUAL_SX127x
-    configure_mode(MODE_19HZ_7X);
+    // for devices which can do both modes we need to toggle
+    if (Config.Mode == MODE_19HZ_7X) {
+        mode_mask = 0xFFFF;
+        configure_mode(MODE_19HZ_7X, Config.FrequencyBand);
+        mode_mask &=~ (1 << Config.FrequencyBand); // clear bit for current frequency band
+    } else {
+        mode_mask = 0;
+        configure_mode(MODE_19HZ, Config.FrequencyBand);
+        mode_mask |= (1 << Config.FrequencyBand); // set bit for current frequency band
+    }
+
+    config_rf();
+}
+
+
+// used only by Rx
+// is called in rx main when fhss.HopToNextBind() returns true
+// the frequency band is obtained with fhss.GetCurrBindSetupFrequencyBand()
+void tBindBase::HopToNextBind(uint16_t frequency_band) // SETUP_FREQUENCY_BAND_ENUM
+{
+    // not nice
+    // we would need SetupMetaData.Mode_allowed_mask before it is adjusted for the selected frequency band
+    // could keep a copy of the un-adjusted SetupMetaData.Mode_allowed_mask
+    // for the moment reconstruct the info by explicit defines
+#if defined DEVICE_HAS_LR11xx
+    uint16_t mode_allowed_mask = 0b110111; // 50 Hz, 31 Hz, 19 Hz, 19 Hz 7x, FSK // only important that both 19Hz and 19Hz7x are set
+#elif defined DEVICE_HAS_SX127x
+    uint16_t mode_allowed_mask = 0b100000; // 19 Hz 7x, not editable // only important that only 19Hz7x is set
 #else
-    configure_mode(MODE_19HZ);
+    uint16_t mode_allowed_mask = 0b000111; // 50 Hz, 31 Hz, 19 Hz // only important that only 19Hz is set
 #endif
 
+    // if both 19Hz and 19Hz7X are set, we need to cycle with toggles
+    if ((mode_allowed_mask & (1 << MODE_19HZ)) && (mode_allowed_mask & (1 << MODE_19HZ_7X))) {
+        if (frequency_band == SETUP_FREQUENCY_BAND_2P4_GHZ) {
+            configure_mode(MODE_19HZ, frequency_band);
+        } else {
+            if (mode_mask & (1 << frequency_band)) {
+                configure_mode(MODE_19HZ_7X, frequency_band);
+                mode_mask &=~ (1 << frequency_band); // clear bit
+            } else {
+                configure_mode(MODE_19HZ, frequency_band);
+                mode_mask |= (1 << frequency_band); // set bit
+            }
+        }
+        config_rf();
+    }
+}
+
+
+void tBindBase::config_rf(void)
+{
     sx.SetToIdle();
     sx2.SetToIdle();
     sx.SetRfPower_dbm(rfpower_list[0].dbm);
     sx2.SetRfPower_dbm(rfpower_list[0].dbm);
-    sx.ResetToLoraConfiguration();
-    sx2.ResetToLoraConfiguration();
+    IF_SX(sx.ResetToLoraConfiguration());
+    IF_SX2(sx2.ResetToLoraConfiguration());
     sx.SetToIdle();
     sx2.SetToIdle();
 }
@@ -225,7 +282,7 @@ void tBindBase::do_transmit(uint8_t antenna)
     txBindFrame.connected = connected();
 
     strbufstrcpy(txBindFrame.BindPhrase_6, Setup.Common[Config.ConfigId].BindPhrase, 6);
-    // TODO txBindFrame.FrequencyBand = Setup.Common[Config.ConfigId].FrequencyBand;
+    txBindFrame.FrequencyBand = Setup.Common[Config.ConfigId].FrequencyBand;
     txBindFrame.Mode = Setup.Common[Config.ConfigId].Mode;
     txBindFrame.Ortho = Setup.Common[Config.ConfigId].Ortho;
 
@@ -258,7 +315,7 @@ void tBindBase::handle_receive(uint8_t antenna, uint8_t rx_status)
     if (rx_status == RX_STATUS_INVALID) return;
 
     strstrbufcpy(Setup.Common[0].BindPhrase, txBindFrame.BindPhrase_6, 6);
-    // TODO Setup.Common[0].FrequencyBand = txBindFrame.FrequencyBand;
+    Setup.Common[0].FrequencyBand = (SETUP_FREQUENCY_BAND_ENUM)txBindFrame.FrequencyBand;
     Setup.Common[0].Mode = txBindFrame.Mode;
     Setup.Common[0].Ortho = txBindFrame.Ortho;
 

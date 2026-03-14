@@ -74,6 +74,7 @@ static inline void delay_ns(uint32_t ns) {} // LA log shows, no delay needed
 #define EE_START_PAGE             60 // 128 kB flash, 2 kB page
 
 #define MICROS_TIMx               TIM3
+#define MICROS_TIM_NAMEPREFIX     TIM3_
 
 
 //-- UARTS
@@ -344,7 +345,7 @@ void systembootloader_init(void)
 //-- POWER
 
 #define POWER_GAIN_DBM            24 // 35 // gain of a PA stage if present // datasheet of SKY66312-11 says 35dB !
-#define POWER_SX1280_MAX_DBM      SX1280_POWER_6_DBM //SX1280_POWER_m3_DBM // maximum allowed sx power
+#define POWER_SX1280_MAX          SX1280_POWER_6_DBM //SX1280_POWER_m3_DBM // maximum allowed sx power
 #define POWER_USE_DEFAULT_RFPOWER_CALC
 
 #define RFPOWER_DEFAULT           1 // index into rfpower_list array

@@ -102,6 +102,7 @@
 #include "../modules/stm32ll-lib/src/stdstm32-i2c.h"
 #endif
 #include "../Common/hal/timer.h"
+#include "clock_tx.h"
 
 #endif //#if defined ESP8266 || defined ESP32
 
@@ -233,18 +234,6 @@ void tWhileTransmit::handle_once(void)
 //-------------------------------------------------------
 // Some helper
 //-------------------------------------------------------
-
-void start_bind(void)
-{
-    if (!bind.IsInBind()) bind.StartBind();
-}
-
-
-void stop_bind(void)
-{
-    if (bind.IsInBind()) bind.StopBind();
-}
-
 
 void enter_system_bootloader(void)
 {
@@ -505,7 +494,10 @@ uint8_t payload_len = 0;
     frame_stats.transmit_antenna = antenna;
     frame_stats.rssi = stats.GetLastRssi();
 
-    uint8_t fhss_band = fhss_band_next();
+    // Note: the receiver wants to see both bands, also single band receivers.
+    // It is then important however that fhss1_curr_i and fhss2_curr_i are identical, as otherwise
+    // the receiver would jump to wrong frequencies
+    uint8_t fhss_band = fhss_band_next(); // this randomly toggles between 0 and 1, but never has more than two symbols in a row
     frame_stats.tx_fhss_index_band = fhss_band;
     frame_stats.tx_fhss_index = ((fhss_band & 0x01) == 0) ? fhss1_curr_i : fhss2_curr_i;
 
@@ -685,6 +677,7 @@ uint16_t tick_1hz;
 uint16_t tick_1hz_commensurate;
 
 uint16_t link_state;
+uint8_t link_tx_status;
 uint8_t connect_state;
 uint16_t connect_tmo_cnt;
 uint8_t connect_sync_cnt;
@@ -721,6 +714,7 @@ RESTARTCONTROLLER
 
     // startup sign of life
     leds.Init();
+    info.Init();
 
     // start up sx
     if (!sx.isOk()) { FAILALWAYS(BLINK_RD_GR_OFF, "Sx not ok"); } // fail!
@@ -746,6 +740,7 @@ RESTARTCONTROLLER
     connect_sync_cnt = 0;
     connect_occured_once = false;
     link_rx1_status = link_rx2_status = RX_STATUS_NONE;
+    link_tx_status = TX_STATUS_NONE;
     link_task_init();
     link_task_set(LINK_TASK_TX_GET_RX_SETUPDATA); // we start with wanting to get rx setup data
 
@@ -814,7 +809,7 @@ INITCONTROLLER_END
 
             if (!tick_1hz) {
                 if (Setup.Tx[Config.ConfigId].Buzzer == BUZZER_RX_LQ && connect_occured_once) {
-                    buzzer.BeepLQ(stats.received_LQ_rc);
+                    buzzer.BeepLQ(stats.GetReceivedLQ_rc());
                 }
             }
 
@@ -822,6 +817,7 @@ INITCONTROLLER_END
             disp.Tick_ms(); // can take long
             fan.SetPower(sx.RfPower_dbm());
             fan.Tick_ms();
+            esp.Tick_ms();
 
             if (!tick_1hz) {
                 dbg.puts(".");
@@ -865,6 +861,7 @@ INITCONTROLLER_END
         sx2.SetRfFrequency(fhss.GetCurrFreq2());
         do_transmit_send(tdiversity.Antenna());
         link_state = LINK_STATE_TRANSMIT_WAIT;
+        link_tx_status = TX_STATUS_NONE;
         irq_status = irq2_status = 0;
         DBG_MAIN_SLIM(dbg.puts(">");)
         // auxiliaries
@@ -873,8 +870,8 @@ INITCONTROLLER_END
         break; }
 
     case LINK_STATE_RECEIVE:
-        IF_ANTENNA1(sx.SetToRx(0));
-        IF_ANTENNA2(sx2.SetToRx(0));
+        IF_ANTENNA1(sx.SetToRx());
+        IF_ANTENNA2(sx2.SetToRx());
         link_state = LINK_STATE_RECEIVE_WAIT;
         link_rx1_status = link_rx2_status = RX_STATUS_NONE;
         irq_status = irq2_status = 0;
@@ -887,7 +884,8 @@ IF_SX(
         if (link_state == LINK_STATE_TRANSMIT_WAIT) {
             if (irq_status & SX_IRQ_TX_DONE) {
                 irq_status = 0;
-                link_state = LINK_STATE_RECEIVE;
+                link_tx_status |= TX_STATUS_TX1_DONE;
+                if (!Config.IsDualBand || (link_tx_status & TX_STATUS_TX2_DONE)) { link_state = LINK_STATE_RECEIVE; }
                 DBG_MAIN_SLIM(dbg.puts("1!");)
             }
         } else
@@ -920,7 +918,8 @@ IF_SX2(
         if (link_state == LINK_STATE_TRANSMIT_WAIT) {
             if (irq2_status & SX2_IRQ_TX_DONE) {
                 irq2_status = 0;
-                link_state = LINK_STATE_RECEIVE;
+                link_tx_status |= TX_STATUS_TX2_DONE;
+                if (!Config.IsDualBand || (link_tx_status & TX_STATUS_TX1_DONE)) { link_state = LINK_STATE_RECEIVE; }
                 DBG_MAIN_SLIM(dbg.puts("2!");)
             }
         } else
@@ -969,13 +968,14 @@ IF_SX2(
         }
 
         if (frame_received) { // frame received
-            uint8_t antenna = ANTENNA_1;
             if (USE_ANTENNA1 && USE_ANTENNA2) {
-                antenna = rdiversity.Antenna(link_rx1_status, link_rx2_status, stats.last_rssi1, stats.last_rssi2);
+                uint8_t antenna = rdiversity.Antenna(link_rx1_status, link_rx2_status, stats.last_rssi1, stats.last_rssi2);
+                handle_receive(antenna);
             } else if (USE_ANTENNA2) {
-                antenna = ANTENNA_2;
+                handle_receive(ANTENNA_2);
+            } else { // use antenna1
+                handle_receive(ANTENNA_1);
             }
-            handle_receive(antenna);
         } else {
             handle_receive_none();
         }
@@ -1015,10 +1015,10 @@ IF_SX2(
                 }
                 if (connect_sync_cnt >= connect_sync_cnt_max) {
                     if (!SetupMetaData.rx_available && !bind.IsInBind()) {
-                        // should not have happen, but does very occasionally happen, so let's cope with
-                        // we must have gotten it at least once, on first connect, since we need it
-                        // later on we can accept to be gentle and be ok with not getting it again
-                        // bottom line: the receiver must not change after first connection
+                        // should not happen, but does very occasionally happen, so let's cope with it
+                        // We must have gotten it at least once, on first connect, since we need it.
+                        // Later on we can accept to be gentle and be ok with not getting it again.
+                        // Bottom line: the receiver must not change after first connection.
                         if (connect_occured_once) {
                             link_task_reset();
                             SetupMetaData.rx_available = true;
@@ -1026,6 +1026,9 @@ IF_SX2(
                             // we could be more gentle and postpone connection by one cnt
                             FAILALWAYS(BLINK_3, "rx_available not true");
                         }
+                    }
+                    if (!connect_occured_once) {
+                        stats.JustConnected();
                     }
                     connect_state = CONNECT_STATE_CONNECTED;
                     connect_occured_once = true;
@@ -1254,13 +1257,18 @@ IF_IN(
             mbridge.Lock(); // lock mBridge
         }
         break;
-    case MAIN_TASK_BIND_START: start_bind(); break;
-    case MAIN_TASK_BIND_STOP: stop_bind(); break;
+    case MAIN_TASK_BIND_START: bind.StartBind(); break;
+    case MAIN_TASK_BIND_STOP: bind.StopBind(); break;
     case MAIN_TASK_SYSTEM_BOOT: enter_system_bootloader(); break;
+    case TX_TASK_CLI_CHANGE_CONFIG_ID: config_id.Change(tasks.GetCliTaskValue()); break;
     case TX_TASK_FLASH_ESP: esp.EnterFlash(); break;
     case TX_TASK_ESP_PASSTHROUGH: esp.EnterPassthrough(); break;
-    case TX_TASK_CLI_CHANGE_CONFIG_ID: config_id.Change(tasks.GetCliTaskValue()); break;
+    case TX_TASK_CLI_ESP_GET_PASSWORD: esp.GetPassword(); break;
+    case TX_TASK_CLI_ESP_SET_PASSWORD: esp.SetPassword(tasks.GetCliTaskStr()); break;
+    case TX_TASK_CLI_ESP_GET_NETWORK_SSID: esp.GetNetSsid(); break;
+    case TX_TASK_CLI_ESP_SET_NETWORK_SSID: esp.SetNetSsid(tasks.GetCliTaskStr()); break;
     case TX_TASK_HC04_PASSTHROUGH: hc04.EnterPassthrough(); break;
+    case TX_TASK_CLI_HC04_GETPIN: hc04.GetPin(); break;
     case TX_TASK_CLI_HC04_SETPIN: hc04.SetPin(tasks.GetCliTaskValue()); break;
     }
     if (tx_task == MAIN_TASK_RESTART_CONTROLLER) { GOTO_RESTARTCONTROLLER; }

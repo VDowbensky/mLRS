@@ -9,7 +9,7 @@
  run_make_firmwares.py
  3rd version, doesn't use make but calls gnu directly
  gave up on cmake, hence naive by hand
- version 4.05.2025
+ version 7.03.2026
 ********************************************************
 '''
 import os
@@ -87,6 +87,10 @@ if __name__ == "__main__":
         st_root = os.path.join("/opt",'st')
 
     ST_DIR,GNU_DIR = findSTM32CubeIDEGnuTools(st_root)
+    if os.getenv("MLRS_ST_DIR"):
+        ST_DIR = os.getenv("MLRS_ST_DIR")
+    if os.getenv("MLRS_GNU_DIR"):
+        GNU_DIR = os.getenv("MLRS_GNU_DIR")
 
     if ST_DIR == '' or GNU_DIR == '' or not os.path.exists(os.path.join(ST_DIR,GNU_DIR)):
         print('ERROR: gnu-tools not found!')
@@ -460,6 +464,7 @@ MLRS_SOURCES_COMMON = [
     os.path.join('Common','channel_order.cpp'),
     os.path.join('Common','common_stats.cpp'),
     os.path.join('Common','common_types.cpp'),
+    os.path.join('Common','setup_types.cpp'),
     os.path.join('Common','diversity.cpp'),
     os.path.join('Common','fhss.cpp'),
     os.path.join('Common','link_types.cpp'),
@@ -1001,12 +1006,14 @@ TLIST = [
         'target' : 'rx-matek-mr900-22-wle5cc',          'target_D' : 'RX_MATEK_MR900_22_WLE5CC',
         'extra_D_list' : [], 'appendix' : '',
     },{
-
-        'target' : 'rx-matek-mr24-30-g431kb',           'target_D' : 'RX_MATEK_MR24_30_G431KB',
-        'extra_D_list' : ['MLRS_FEATURE_CAN'], 'appendix' : '-can',
+        'target' : 'rx-matek-mr24-30c-g431kb',         'target_D' : 'RX_MATEK_MR24_30C_G431KB',
+        'extra_D_list' : [], 'appendix' : '',
     },{
-        'target' : 'rx-matek-mr900-30-g431kb',          'target_D' : 'RX_MATEK_MR900_30_G431KB',
-        'extra_D_list' : ['MLRS_FEATURE_CAN'], 'appendix' : '-can',
+        'target' : 'rx-matek-mr900-30c-g431kb',         'target_D' : 'RX_MATEK_MR900_30C_G431KB',
+        'extra_D_list' : [], 'appendix' : '',
+    },{
+        'target' : 'rx-matek-mr900-30td-g474ce',        'target_D' : 'RX_MATEK_MR900_30TD_G474CE',
+        'extra_D_list' : [], 'appendix' : '',
     },{
 
         'target' : 'tx-matek-mr24-30-g431kb',           'target_D' : 'TX_MATEK_MR24_30_G431KB',
@@ -1019,13 +1026,6 @@ TLIST = [
 #        'extra_D_list' : ['STDSTM32_USE_USB','MLRS_FEATURE_MATEK_TXMODULE_MOD','MLRS_FEATURE_HC04_MODULE','MLRS_FEATURE_COM_ON_USB','MLRS_FEATURE_OLED'],
 #        'appendix' : '-oled',
 #    },{
-
-        'target' : 'rx-matek-mr900-30c-g431kb',         'target_D' : 'RX_MATEK_MR900_30C_G431KB',
-        'extra_D_list' : [], 'appendix' : '',
-    },{
-        'target' : 'rx-matek-mr900-td30-g474ce',        'target_D' : 'RX_MATEK_MR900_TD30_G474CE',
-        'extra_D_list' : [], 'appendix' : '',
-    },{
 
         'target' : 'tx-matek-mr900-30-g431kb',          'target_D' : 'TX_MATEK_MR900_30_G431KB',
         'extra_D_list' : ['STDSTM32_USE_USB'], 'appendix' : '-default',
@@ -1074,15 +1074,15 @@ TLIST = [
         'extra_D_list' : ['MLRS_FEATURE_ELRS_BOOTLOADER'],
         'appendix' : '-elrs-bl',
     },{
-        'target' : 'tx-R9MX-l433cb',                    'target_D' : 'TX_R9MX_868_L433CB',
-        'package' : 'ux',
-        'extra_D_list' : [], 'appendix' : '',
-    },{
-        'target' : 'tx-R9MX-l433cb',                    'target_D' : 'TX_R9MX_868_L433CB',
-        'package' : 'ux',
-        'extra_D_list' : ['MLRS_FEATURE_ELRS_BOOTLOADER'],
-        'appendix' : '-elrs-bl',
-    },{
+#        'target' : 'tx-R9MX-l433cb',                    'target_D' : 'TX_R9MX_868_L433CB',
+#        'package' : 'ux',
+#        'extra_D_list' : [], 'appendix' : '',
+#    },{
+#        'target' : 'tx-R9MX-l433cb',                    'target_D' : 'TX_R9MX_868_L433CB',
+#        'package' : 'ux',
+#        'extra_D_list' : ['MLRS_FEATURE_ELRS_BOOTLOADER'],
+#        'appendix' : '-elrs-bl',
+#    },{
 
 #-- FlySky FRM303
 #        'target' : 'rx-FRM303-f072cb',                  'target_D' : 'RX_FRM303_F072CB',
@@ -1119,9 +1119,9 @@ TLIST = [
         'target' : 'rx-Wio-E5-Mini-wle5jc',             'target_D' : 'RX_WIO_E5_MINI_WLE5JC',
         'extra_D_list' : [], 'appendix' : '',
     },{
-        'target' : 'rx-Wio-E5-Grove-wle5jc',            'target_D' : 'RX_WIO_E5_GROVE_WLE5JC',
-        'extra_D_list' : [], 'appendix' : '',
-    },{
+#        'target' : 'rx-Wio-E5-Grove-wle5jc',            'target_D' : 'RX_WIO_E5_GROVE_WLE5JC',
+#        'extra_D_list' : [], 'appendix' : '',
+#    },{
 #-- rx E77 MBL
         'target' : 'rx-E77-MBLKit-wle5cc',              'target_D' : 'RX_E77_MBLKIT_WLE5CC',
         'extra_D_list' : ['MLRS_FEATURE_868_MHZ','MLRS_FEATURE_915_MHZ_FCC'],

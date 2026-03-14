@@ -7,11 +7,9 @@
 //*******************************************************
 
 //-------------------------------------------------------
-// ESP32, Radiomaster Boxer Tx Internal ELRS 2.4GHz
+// ESP32, Radiomaster Tx Boxer, Internal SX1280 2400
 //-------------------------------------------------------
-
 // https://github.com/ExpressLRS/targets/blob/master/TX/Radiomaster%20Boxer.json
-
 
 #define DEVICE_HAS_JRPIN5
 #define DEVICE_HAS_NO_COM
@@ -145,7 +143,7 @@ IRAM_ATTR void esp_gpio0_low(void) { gpio_high(ESP_GPIO0); }
 //-- POWER
 
 #define POWER_GAIN_DBM            32 // gain of a PA stage if present
-#define POWER_SX1280_MAX_DBM      SX1280_POWER_0_DBM  // maximum allowed sx power
+#define POWER_SX1280_MAX          SX1280_POWER_0_DBM  // maximum allowed sx power
 #define POWER_USE_DEFAULT_RFPOWER_CALC
 
 #define RFPOWER_DEFAULT           0 // index into rfpower_list array
